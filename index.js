@@ -1,6 +1,7 @@
 const { query, response } = require("express");
 const e = require("express");
 const express = require("express");
+const { type } = require("express/lib/response");
 const mysql = require("mysql");
 
 const app = express();
@@ -53,6 +54,15 @@ app.get("/vehicle/:id?", (request, response) => {
 app.post("/vehicle/add", (request, response) => {
   const data = request.body;
   //expected body {name, type, merk, stock, price}
+
+  const error = validate_data_vehicle(data);
+
+  if (error.length > 0) {
+    return response.json({
+      success: false,
+      error: error,
+    });
+  }
 
   const q = connection.query(
     "INSERT INTO vehicle SET ?",
@@ -112,6 +122,15 @@ app.delete("/vehicle/:id", (request, response) => {
 app.patch("/vehicle/edit/:id", (request, response) => {
   const { id } = request.params;
 
+  const error = validate_data_vehicle(data);
+
+  if (error.length > 0) {
+    return response.json({
+      success: false,
+      error: error,
+    });
+  }
+
   const q = "select * from vehicle where id = " + id;
 
   connection.query(q, (error, results, fields) => {
@@ -152,3 +171,33 @@ app.patch("/vehicle/edit/:id", (request, response) => {
     }
   });
 });
+
+function validate_data_vehicle(data) {
+  //expected data {name, type, merk, stock, price}
+  const error = [];
+
+  if (data.name == undefined || data.name.length == 0) {
+    error.push("Input parameter nama salah!");
+  }
+  if (data.type == undefined || data.type.length == 0) {
+    error.push("Input parameter type salah!");
+  }
+  if (data.merk == undefined || data.merk.length == 0) {
+    error.push("Input parameter merk salah!");
+  }
+  if (
+    data.stock == undefined ||
+    data.stock.length == 0 ||
+    typeof parseInt(data.stock) != "number"
+  ) {
+    error.push("Input parameter stock salah!");
+  }
+  if (
+    data.price == undefined ||
+    data.price.length == 0 ||
+    typeof parseFloat(data.price) != "number"
+  ) {
+    error.push("Input parameter price salah!");
+  }
+  return error;
+}
