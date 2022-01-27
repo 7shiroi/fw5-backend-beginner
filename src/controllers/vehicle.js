@@ -63,16 +63,16 @@ const addVehicle = (req, res) => {
   //   expected body {name, type, merk, stock, price}
   const error = validate_data_vehicle(data);
   if (error.length > 0) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       error: error,
     });
   }
 
-  vehicleModel.addVehicle(data, () => {
+  vehicleModel.addVehicle(data, (result) => {
     return res.json({
       success: true,
-      message: "1 vehicle added",
+      message: result.affectedRows + " vehicle added",
     });
   });
 };
@@ -91,9 +91,10 @@ const editVehicle = (req, res) => {
 
   vehicleModel.getVehicle(id, (results) => {
     if (results.length > 0) {
-      vehicleModel.editVehicle(id, data, () => {
+      vehicleModel.editVehicle(id, data, (result) => {
         return res.json({
           succes: true,
+          sql_res: "Affected rows: " + result.affectedRows,
           message: "Vehicle with id " + id + " has been updated",
         });
       });
@@ -111,9 +112,10 @@ const deleteVehicle = (req, res) => {
 
   vehicleModel.getVehicle(id, (results) => {
     if (results.length > 0) {
-      vehicleModel.deleteVehicle(id, () => {
+      vehicleModel.deleteVehicle(id, (result) => {
         return res.json({
           succes: true,
+          sql_res: "Affected rows: " + result.affectedRows,
           message: "Vehicle with id " + id + " has been deleted",
         });
       });

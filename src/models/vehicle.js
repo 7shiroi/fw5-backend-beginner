@@ -3,7 +3,7 @@ const db = require("../helpers/db");
 exports.getVehicles = (cb) => {
   db.query("SELECT * FROM vehicle", (err, res) => {
     if (err)
-      throw response.json({
+      throw response.status(500).json({
         success: false,
         // query: q.sql,
         error: error,
@@ -15,7 +15,7 @@ exports.getVehicles = (cb) => {
 exports.getVehicle = (id, cb) => {
   db.query("SELECT * FROM vehicle WHERE id=?", [id], (err, res) => {
     if (err)
-      throw response.json({
+      throw response.status(500).json({
         success: false,
         // query: q.sql,
         error: error,
@@ -25,41 +25,41 @@ exports.getVehicle = (id, cb) => {
 };
 
 exports.addVehicle = (data, cb) => {
-  db.query("INSERT INTO vehicle SET ?", data, (error) => {
+  db.query("INSERT INTO vehicle SET ?", data, (error, res) => {
     if (error)
-      throw response.json({
+      throw response.status(500).json({
         success: false,
         // query: q.sql,
         error: error,
       });
-    cb();
+    cb(res);
   });
 };
 
 exports.editVehicle = (id, data, cb) => {
-  db.query(
+  const q = db.query(
     "UPDATE vehicle SET name = ?, type = ?, merk = ?, stock = ?, price = ? WHERE id = ?",
     [data.name, data.type, data.merk, data.stock, data.price, id],
-    (error) => {
+    (error, res) => {
       if (error)
-        throw response.json({
+        throw response.status(500).json({
           success: false,
-          //   query: query.sql,
+          // query: q.sql,
           error: error,
         });
-      cb();
+      cb(res);
     }
   );
 };
 
 exports.deleteVehicle = (id, cb) => {
-  db.query("DELETE FROM vehicle WHERE id = ?", [id], (error) => {
+  db.query("DELETE FROM vehicle WHERE id = ?", [id], (error, res) => {
     if (error)
-      throw response.json({
+      throw response.status(500).json({
         success: false,
         //   query: query.sql,
         error: error,
       });
-    cb();
+    cb(res);
   });
 };
