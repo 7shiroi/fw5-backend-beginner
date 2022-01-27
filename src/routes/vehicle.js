@@ -1,4 +1,4 @@
-const vehicle = require("express").Router();
+const vehicle = require('express').Router();
 
 const {
   getVehicles,
@@ -6,12 +6,12 @@ const {
   addVehicle,
   editVehicle,
   deleteVehicle,
-} = require("../controllers/vehicle");
+} = require('../controllers/vehicle');
 
-vehicle.get("/", getVehicles);
-vehicle.get("/:id", getVehicle);
-vehicle.post("/add", addVehicle);
-vehicle.patch("/edit/:id", editVehicle);
-vehicle.delete("/delete/:id", deleteVehicle);
+vehicle.get('/', getVehicles);
+vehicle.get('/:id', getVehicle);
+vehicle.post('/add', addVehicle);
+vehicle.patch('/edit/:id', editVehicle);
+vehicle.delete('/delete/:id', deleteVehicle);
 
 module.exports = vehicle;

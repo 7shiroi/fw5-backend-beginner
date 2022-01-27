@@ -1,5 +1,5 @@
-const route = require("express").Router();
+const route = require('express').Router();
 
-route.use("/vehicle", require("./vehicle"));
+route.use('/vehicle', require('./vehicle'));
 
 module.exports = route;
