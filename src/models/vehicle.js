@@ -1,7 +1,7 @@
 const db = require('../helpers/db');
 
 exports.getVehicles = (cb) => {
-  db.query('SELECT * FROM vehicle', (error, res) => {
+  db.query('SELECT * FROM vehicles', (error, res) => {
     if (error) {
       throw res.status(500).json({
         success: false,
@@ -14,7 +14,7 @@ exports.getVehicles = (cb) => {
 };
 
 exports.getVehicle = (id, cb) => {
-  db.query('SELECT * FROM vehicle WHERE id=?', [id], (error, res) => {
+  db.query('SELECT * FROM vehicles WHERE id=?', [id], (error, res) => {
     if (error) {
       throw res.status(500).json({
         success: false,
@@ -27,7 +27,7 @@ exports.getVehicle = (id, cb) => {
 };
 
 exports.addVehicle = (data, cb) => {
-  db.query('INSERT INTO vehicle SET ?', data, (error, res) => {
+  db.query('INSERT INTO vehicles SET ?', data, (error, res) => {
     if (error) {
       throw res.status(500).json({
         success: false,
@@ -42,8 +42,8 @@ exports.addVehicle = (data, cb) => {
 exports.editVehicle = (id, data, cb) => {
   db.query(
     // eslint-disable-next-line max-len
-    'UPDATE vehicle SET name = ?, type = ?, merk = ?, stock = ?, price = ? WHERE id = ?',
-    [data.name, data.type, data.merk, data.stock, data.price, id],
+    'UPDATE vehicles SET ? WHERE id = ?',
+    [data, id],
     (error, res) => {
       if (error) {
         throw res.status(500).json({
@@ -58,7 +58,7 @@ exports.editVehicle = (id, data, cb) => {
 };
 
 exports.deleteVehicle = (id, cb) => {
-  db.query('DELETE FROM vehicle WHERE id = ?', [id], (error, res) => {
+  db.query('DELETE FROM vehicles WHERE id = ?', [id], (error, res) => {
     if (error) {
       throw res.status(500).json({
         success: false,

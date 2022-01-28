@@ -28,32 +28,55 @@ const getVehicle = (req, res) => {
 
 // eslint-disable-next-line require-jsdoc
 function validateDataVehicle(data) {
-  // expected data {name, type, merk, stock, price}
+  // expected data {name, color, location, stock, price, capacity, is_available(0,1),
+  // has_repayment(0,1), reservation_deadline check string format (00.00)}
   const error = [];
 
   if (data.name === undefined || data.name.length === 0) {
     error.push('Input parameter nama salah!');
   }
-  if (data.type === undefined || data.type.length === 0) {
-    error.push('Input parameter type salah!');
+  if (data.color === undefined || data.color.length === 0) {
+    error.push('Input parameter warna salah!');
   }
-  if (data.merk === undefined || data.merk.length === 0) {
-    error.push('Input parameter merk salah!');
+  if (data.location === undefined || data.location.length === 0) {
+    error.push('Input parameter lokasi salah!');
   }
   if (
     data.stock === undefined
-    || data.stock.length === 0
     || typeof parseInt(data.stock, 10) !== 'number'
+    || data.stock.length === 0
   ) {
     error.push('Input parameter stock salah!');
   }
   if (
     data.price === undefined
-    || data.price.length === 0
     || typeof parseFloat(data.price) !== 'number'
+    || data.price.length === 0
   ) {
-    error.push('Input parameter price salah!');
+    error.push('Input parameter harga salah!');
   }
+  if (
+    data.price === undefined
+    || typeof parseFloat(data.price) !== 'number'
+    || data.price.length === 0
+  ) {
+    error.push('Input parameter harga salah!');
+  }
+  if (
+    data.is_available !== undefined
+    && (parseInt(data.is_available, 10) < 0
+    && parseInt(data.is_available, 10) > 1)
+  ) {
+    error.push('Input parameter is_available salah!');
+  }
+  if (
+    data.has_prepayment !== undefined
+    && parseInt(data.has_prepayment, 10) < 0
+    && parseInt(data.has_prepayment, 10) > 1
+  ) {
+    error.push('Input parameter has_prepayment salah!');
+  }
+  // todo: validate reservation deadline
   return error;
 }
 
