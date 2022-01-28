@@ -79,15 +79,13 @@ function validateDataVehicle(data) {
   }
   if (
     data.is_available !== undefined
-    && (parseInt(data.is_available, 10) < 0
-    && parseInt(data.is_available, 10) > 1)
+    && (parseInt(data.is_available, 10) < 0 || parseInt(data.is_available, 10) > 1)
   ) {
     error.push('Input parameter is_available salah!');
   }
   if (
     data.has_prepayment !== undefined
-    && parseInt(data.has_prepayment, 10) < 0
-    && parseInt(data.has_prepayment, 10) > 1
+    && (parseInt(data.has_prepayment, 10) < 0 || parseInt(data.has_prepayment, 10) > 1)
   ) {
     error.push('Input parameter has_prepayment salah!');
   }
