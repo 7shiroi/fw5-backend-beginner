@@ -36,27 +36,24 @@ function validateDataHistory(data) {
 
   if (data.id_user === undefined || parseInt(data.id_user, 10) <= 0) {
     error.push('Input parameter id_user salah!');
-  } else {
-    const errMsg = userModel.getUser(data.id_user, (res) => {
-      if (res.length === 0) {
-        return 'User not found';
-      }
-    });
-    if (errMsg) {
-      error.push(errMsg);
-    }
   }
+  // else {
+  //   userModel.getUser(data.id_user, (res) => {
+  //     if (res.length === 0) {
+  //       error.push('User tidak ditemukan');
+  //     }
+  //   });
+  // }
   if (data.id_vehicle === undefined || parseInt(data.id_vehicle, 10) <= 0) {
     error.push('Input parameter id_vehicle salah!');
-  } else {
-    vehicleModel.getVehicle(data.id_vehicle, (res) => {
-      if (res.length === 0) {
-        error.push('Kendaraan tidak ditemukan');
-        console.log('dalam : ' + error)
-      }
-    });
   }
-  console.log('luar : ' + error)
+  // else {
+  //   vehicleModel.getVehicle(data.id_vehicle, (res) => {
+  //     if (res.length === 0) {
+  //       error.push('Kendaraan tidak ditemukan');
+  //     }
+  //   });
+  // }
   // todo add validation for date
   if (data.date_start === undefined || data.date_start.length === 0) {
     error.push('Input parameter date_start salah!');
@@ -87,10 +84,26 @@ const addHistory = (req, res) => {
     });
   }
 
-  historyModel.addHistory(data, (result) => res.json({
-    success: true,
-    message: `${result.affectedRows} history added`,
-  }));
+  userModel.getUser(data.id_user, (resultUser) => {
+    if (resultUser.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'user tidak ditemukan',
+      });
+    }
+    vehicleModel.getVehicle(data.id_vehicle, (resultVehicle) => {
+      if (resultVehicle.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Kendaraan tidak ditemukan',
+        });
+      }
+      historyModel.addHistory(data, (result) => res.json({
+        success: true,
+        message: `${result.affectedRows} history added`,
+      }));
+    });
+  });
 };
 
 const editHistory = (req, res) => {
@@ -104,19 +117,35 @@ const editHistory = (req, res) => {
     });
   }
 
-  historyModel.getHistory(id, (results) => {
-    if (results.length > 0) {
-      historyModel.editHistory(id, data, (result) => res.json({
-        success: true,
-        sql_res: `Affected rows: ${result.affectedRows}`,
-        message: `History with id ${id} has been updated`,
-      }));
-    } else {
-      return res.status(404).json({
+  userModel.getUser(data.id_user, (resultUser) => {
+    if (resultUser.length === 0) {
+      return res.status(400).json({
         success: false,
-        message: 'History not found',
+        error: 'user tidak ditemukan',
       });
     }
+    vehicleModel.getVehicle(data.id_vehicle, (resultVehicle) => {
+      if (resultVehicle.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Kendaraan tidak ditemukan',
+        });
+      }
+      historyModel.getHistory(id, (results) => {
+        if (results.length > 0) {
+          historyModel.editHistory(id, data, (result) => res.json({
+            success: true,
+            sql_res: `Affected rows: ${result.affectedRows}`,
+            message: `History with id ${id} has been updated`,
+          }));
+        } else {
+          return res.status(404).json({
+            success: false,
+            message: 'History not found',
+          });
+        }
+      });
+    });
   });
 };
 
