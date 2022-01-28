@@ -35,11 +35,26 @@ function validateDataVehicle(data) {
   if (data.name === undefined || data.name.length === 0) {
     error.push('Input parameter nama salah!');
   }
+  if (data.name.length > 100) {
+    error.push('Input nama terlalu panjang!');
+  }
+  if (data.category === undefined || data.category.length === 0) {
+    error.push('Input parameter kategori salah!');
+  }
+  if (data.category.length > 30) {
+    error.push('Input kategori terlalu panjang!');
+  }
   if (data.color === undefined || data.color.length === 0) {
     error.push('Input parameter warna salah!');
   }
+  if (data.color.length > 30) {
+    error.push('Input warna terlalu panjang!');
+  }
   if (data.location === undefined || data.location.length === 0) {
     error.push('Input parameter lokasi salah!');
+  }
+  if (data.location.length > 100) {
+    error.push('Input lokasi terlalu panjang!');
   }
   if (
     data.stock === undefined

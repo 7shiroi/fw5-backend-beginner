@@ -10,8 +10,8 @@ const {
 
 vehicle.get('/', getVehicles);
 vehicle.get('/:id', getVehicle);
-vehicle.post('/add', addVehicle);
-vehicle.patch('/edit/:id', editVehicle);
-vehicle.delete('/delete/:id', deleteVehicle);
+vehicle.post('/', addVehicle);
+vehicle.patch('/:id', editVehicle);
+vehicle.delete('/:id', deleteVehicle);
 
 module.exports = vehicle;
