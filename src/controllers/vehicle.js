@@ -26,6 +26,11 @@ const getVehicle = (req, res) => {
   });
 };
 
+const checkStockFormat = (data) => /^[^-0+]\d+$/.test(data) || /^0$/.test(data); // check apakah data isinya hanya digit yang awalnya bukan 0
+const checkPriceFormat = (data) => /^[^-0+]\d+.\d{2}?$/.test(data) || /^0$/.test(data);
+const checkBoolean = (data) => /^[01]$/.test(data);
+const timeValidation = (data) => /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(data);
+
 // eslint-disable-next-line require-jsdoc
 function validateDataVehicle(data) {
   // expected data {name, color, location, stock, price, capacity, is_available(0,1),
@@ -58,38 +63,34 @@ function validateDataVehicle(data) {
   }
   if (
     data.stock === undefined
-    || typeof parseInt(data.stock, 10) !== 'number'
-    || data.stock.length === 0
+    || !checkStockFormat(data.stock)
   ) {
     error.push('Input parameter stock salah!');
   }
   if (
     data.price === undefined
-    || typeof parseFloat(data.price) !== 'number'
-    || data.price.length === 0
-  ) {
-    error.push('Input parameter harga salah!');
-  }
-  if (
-    data.price === undefined
-    || typeof parseFloat(data.price) !== 'number'
-    || data.price.length === 0
+    || !checkPriceFormat(data.price)
   ) {
     error.push('Input parameter harga salah!');
   }
   if (
     data.is_available !== undefined
-    && (parseInt(data.is_available, 10) < 0 || parseInt(data.is_available, 10) > 1)
+    && !checkBoolean(data.is_available)
   ) {
     error.push('Input parameter is_available salah!');
   }
   if (
     data.has_prepayment !== undefined
-    && (parseInt(data.has_prepayment, 10) < 0 || parseInt(data.has_prepayment, 10) > 1)
+    && !checkBoolean(data.has_prepayment)
   ) {
     error.push('Input parameter has_prepayment salah!');
   }
-  // todo: validate reservation deadline
+  if (
+    data.reservation_deadline !== undefined
+    && !timeValidation(data.reservation_deadline)
+  ) {
+    error.push('Input parameter reservation_deadline salah!');
+  }
   return error;
 }
 

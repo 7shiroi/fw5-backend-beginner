@@ -26,28 +26,30 @@ const getUser = (req, res) => {
   });
 };
 
+const checkPhoneNumber = (data) => /^[+0]\d+$/.test(data);
+const dateValidation = (data) => /^[^0]\d{3}-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$/.test(data);
+const emailValidation = (data) => /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(data);
+const passwordValidation = (data) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,20})/.test(data);
+
 // eslint-disable-next-line require-jsdoc
 function validateDataUser(data) {
   // expected data {email, password, name, phone_number, address,
   // display_name, gender, birth_date, picture(nullable)}
   const error = [];
 
-  if (data.email === undefined || data.email.length === 0) {
+  if (data.email === undefined || !emailValidation(data.email)) {
     error.push('Input parameter email salah!');
   }
-  // todo add validation for email
-  if (data.password === undefined || data.password.length === 0) {
+  if (data.password === undefined || passwordValidation(data.password)) {
     error.push('Input parameter password salah!');
-  }
-  if (data.password.length > 20) {
-    error.push('Password terlalu panjang!');
   }
   if (data.name === undefined || data.name.length === 0) {
     error.push('Input parameter nama salah!');
   }
   if (
     data.phone_number === undefined
-    || data.phone_number.length === 0
+    || !checkPhoneNumber(data.phone_number)
+    || data.phone_number.length < 6
     || data.phone_number.length > 16
   ) {
     error.push('Input parameter nomor telepon salah!');
@@ -72,7 +74,10 @@ function validateDataUser(data) {
   ) {
     error.push('Input parameter jenis kelamin salah!');
   }
-  if (data.birth_date === undefined) { // todo: add validation date yyyy-mm-dd
+  if (
+    data.birth_date === undefined
+    || !dateValidation(data.birth_date)
+  ) {
     error.push('Input parameter tanggal lahir salah!');
   }
   return error;

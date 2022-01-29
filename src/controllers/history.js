@@ -28,13 +28,32 @@ const getHistory = (req, res) => {
   });
 };
 
+const checkPriceFormat = (data) => /^[^-0+]\d+.\d{2}?$/.test(data) || /^0$/.test(data);
+const dateValidation = (data) => /^[^0]\d{3}-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$/.test(data);
+const idValidation = (data) => /^[0-9]+$/.test(data);
+const compareDate = (start, end) => {
+  const dateStart = new Date(start);
+  const dateEnd = new Date(end);
+  if (dateStart < dateEnd) {
+    return -1;
+  }
+  if (dateStart > dateEnd) {
+    return 1;
+  }
+  return 0;
+};
+
 // eslint-disable-next-line require-jsdoc
 function validateDataHistory(data) {
   // expected data {id_user (fk), id_vehicle (fk), date_start, date_end,
   // has_returned, prepayment (nullable)}
   const error = [];
 
-  if (data.id_user === undefined || parseInt(data.id_user, 10) <= 0) {
+  if (
+    data.id_user === undefined
+    || !idValidation(data.id_user)
+    || parseInt(data.id_user, 10) <= 0
+  ) {
     error.push('Input parameter id_user salah!');
   }
   // else {
@@ -44,7 +63,10 @@ function validateDataHistory(data) {
   //     }
   //   });
   // }
-  if (data.id_vehicle === undefined || parseInt(data.id_vehicle, 10) <= 0) {
+  if (
+    data.id_vehicle === undefined
+    || !idValidation(data.id_vehicle)
+    || parseInt(data.id_vehicle, 10) <= 0) {
     error.push('Input parameter id_vehicle salah!');
   }
   // else {
@@ -54,14 +76,12 @@ function validateDataHistory(data) {
   //     }
   //   });
   // }
-  // todo add validation for date
-  if (data.date_start === undefined || data.date_start.length === 0) {
+  if (data.date_start === undefined || !dateValidation(data.date_start)) {
     error.push('Input parameter date_start salah!');
-    if (data.date_end === undefined || data.date_end.length === 0) {
-      error.push('Input parameter date_end salah!');
-    } else {
-      // todo cek date_start < date_end
-    }
+  } else if (data.date_end === undefined || !dateValidation(data.date_end)) {
+    error.push('Input parameter date_end salah!');
+  } else if (compareDate(data.date_start, data.date_end) === 1) {
+    error.push('date_end harus lebih besar dari date_start!');
   }
   if (
     data.has_returned !== undefined
@@ -69,7 +89,12 @@ function validateDataHistory(data) {
   ) {
     error.push('Input parameter has_returned salah!');
   }
-  // todo validation for prepayment maybe?
+  if (
+    data.prepayment !== undefined
+    && !checkPriceFormat(data.prepayment)
+  ) {
+    error.push('Input parameter prepayment salah!');
+  }
 
   return error;
 }
