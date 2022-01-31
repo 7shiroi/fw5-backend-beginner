@@ -26,7 +26,7 @@ const getVehicle = (req, res) => {
   });
 };
 
-const checkStockFormat = (data) => /^[^-0+]\d+$/.test(data) || /^0$/.test(data); // check apakah data isinya hanya digit yang awalnya bukan 0
+const checkStockFormat = (data) => /^[1-9][0-9]*/.test(data); // check apakah data isinya hanya digit yang awalnya bukan 0
 const checkPriceFormat = (data) => /^[^-0+]\d+.\d{2}?$/.test(data) || /^0$/.test(data);
 const checkBoolean = (data) => /^[01]$/.test(data);
 const timeValidation = (data) => /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(data);
@@ -40,25 +40,22 @@ function validateDataVehicle(data) {
   if (data.name === undefined || data.name.length === 0) {
     error.push('Input parameter nama salah!');
   }
-  if (data.name.length > 100) {
+  if (data.name === undefined || data.name.length > 100) {
     error.push('Input nama terlalu panjang!');
   }
   if (data.category === undefined || data.category.length === 0) {
     error.push('Input parameter kategori salah!');
-  }
-  if (data.category.length > 30) {
+  } else if (data.category.length > 30) {
     error.push('Input kategori terlalu panjang!');
   }
   if (data.color === undefined || data.color.length === 0) {
     error.push('Input parameter warna salah!');
-  }
-  if (data.color.length > 30) {
+  } else if (data.color.length > 30) {
     error.push('Input warna terlalu panjang!');
   }
   if (data.location === undefined || data.location.length === 0) {
     error.push('Input parameter lokasi salah!');
-  }
-  if (data.location.length > 100) {
+  } else if (data.location.length > 100) {
     error.push('Input lokasi terlalu panjang!');
   }
   if (
@@ -96,7 +93,6 @@ function validateDataVehicle(data) {
 
 const addVehicle = (req, res) => {
   const data = req.body;
-  //   expected body {name, type, merk, stock, price}
   const error = validateDataVehicle(data);
   if (error.length > 0) {
     return res.status(400).json({
