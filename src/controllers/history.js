@@ -48,7 +48,7 @@ function validateDataHistory(data) {
   // expected data {id_user (fk), id_vehicle (fk), date_start, date_end,
   // has_returned, prepayment (nullable)}
   const error = [];
-
+  // todo make promise version for id validation
   if (
     data.id_user === undefined
     || !idValidation(data.id_user)
@@ -136,7 +136,7 @@ const editHistory = (req, res) => {
   const data = req.body;
   const error = validateDataHistory(data);
   if (error.length > 0) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       error,
     });

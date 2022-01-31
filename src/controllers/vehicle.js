@@ -113,7 +113,7 @@ const editVehicle = (req, res) => {
   //   expected body {name, type, merk, stock, price}
   const error = validateDataVehicle(data);
   if (error.length > 0) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       error,
     });

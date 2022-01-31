@@ -104,7 +104,7 @@ const editUser = (req, res) => {
   const data = req.body;
   const error = validateDataUser(data);
   if (error.length > 0) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       error,
     });
