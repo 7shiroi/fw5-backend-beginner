@@ -93,15 +93,24 @@ const addUser = (req, res) => {
     });
   }
 
-  userModel.addUser(data, (result) => res.json({
-    success: true,
-    message: `${result.affectedRows} user added`,
-  }));
+  userModel.checkIfEmailUsed(data, (emailFound) => {
+    if (emailFound[0].rowsCount) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email is already used',
+      });
+    }
+
+    userModel.addUser(data, (result) => res.json({
+      success: true,
+      message: `${result.affectedRows} user added`,
+    }));
+  });
 };
 
 const editUser = (req, res) => {
-  const { id } = req.params;
   const data = req.body;
+  data.id = req.params.id;
   const error = validateDataUser(data);
   if (error.length > 0) {
     return res.status(400).json({
@@ -110,13 +119,21 @@ const editUser = (req, res) => {
     });
   }
 
-  userModel.getUser(id, (results) => {
+  userModel.getUser(data.id, (results) => {
     if (results.length > 0) {
-      userModel.editUser(id, data, (result) => res.json({
-        success: true,
-        sql_res: `Affected rows: ${result.affectedRows}`,
-        message: `User with id ${id} has been updated`,
-      }));
+      userModel.checkIfEmailUsed(data, (emailFound) => {
+        if (emailFound[0].rowsCount) {
+          return res.status(400).json({
+            success: false,
+            error: 'Email is already used',
+          });
+        }
+        userModel.editUser(data.id, data, (result) => res.json({
+          success: true,
+          sql_res: `Affected rows: ${result.affectedRows}`,
+          message: `User with id ${data.id} has been updated`,
+        }));
+      });
     } else {
       return res.status(404).json({
         success: false,

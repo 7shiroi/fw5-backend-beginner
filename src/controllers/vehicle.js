@@ -100,7 +100,7 @@ const getPopularVehicles = (req, res) => {
   });
 };
 
-const checkStockFormat = (data) => /^[1-9][0-9]*/.test(data); // check apakah data isinya hanya digit yang awalnya bukan 0
+const checkIntegerFormat = (data) => /^[1-9][0-9]*/.test(data); // check apakah data isinya hanya digit yang awalnya bukan 0
 const checkPriceFormat = (data) => /^[^-0+]\d+.\d{2}?$/.test(data) || /^0$/.test(data);
 const checkBoolean = (data) => /^[01]$/.test(data);
 const timeValidation = (data) => /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(data);
@@ -134,7 +134,7 @@ function validateDataVehicle(data) {
   }
   if (
     data.stock === undefined
-    || !checkStockFormat(data.stock)
+    || !checkIntegerFormat(data.stock)
   ) {
     error.push('Input parameter stock salah!');
   }
@@ -143,6 +143,12 @@ function validateDataVehicle(data) {
     || !checkPriceFormat(data.price)
   ) {
     error.push('Input parameter harga salah!');
+  }
+  if (
+    data.capacity === undefined
+    || !checkIntegerFormat(data.capacity)
+  ) {
+    error.push('Input parameter capacity salah!');
   }
   if (
     data.is_available !== undefined
