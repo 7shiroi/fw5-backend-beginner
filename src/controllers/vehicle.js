@@ -59,6 +59,47 @@ const getVehicle = (req, res) => {
   });
 };
 
+const getPopularVehicles = (req, res) => {
+  let { search, page, limit } = req.query;
+  search = search || '';
+  page = parseInt(page, 10) || 1;
+  limit = parseInt(limit, 10) || 5;
+  const offset = (page - 1) * limit;
+  const data = { search, offset, limit };
+  vehicleModel.getPopularVehiclesCount(data, (count) => {
+    const { rowsCount } = count[0];
+    if (rowsCount > 0) {
+      const lastPage = Math.ceil(rowsCount / limit);
+
+      vehicleModel.getPopularVehicles(data, (results) => {
+        if (results.length > 0) {
+          return res.json({
+            success: true,
+            message: 'List Vehicles',
+            pageInfo: {
+              prev: page > 1 ? `http://localhost:5000/vehicles?search=${search}&page=${page - 1}&limit=${limit}` : null,
+              next: page < lastPage ? `http://localhost:5000/vehicles?search=${search}&page=${page + 1}&limit=${limit}` : null,
+              totalData: rowsCount,
+              currentPage: page,
+              lastPage,
+            },
+            results,
+          });
+        }
+        return res.status(404).json({
+          success: false,
+          message: 'List not found',
+        });
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: 'List not found',
+      });
+    }
+  });
+};
+
 const checkStockFormat = (data) => /^[1-9][0-9]*/.test(data); // check apakah data isinya hanya digit yang awalnya bukan 0
 const checkPriceFormat = (data) => /^[^-0+]\d+.\d{2}?$/.test(data) || /^0$/.test(data);
 const checkBoolean = (data) => /^[01]$/.test(data);
@@ -202,4 +243,5 @@ module.exports = {
   addVehicle,
   editVehicle,
   deleteVehicle,
+  getPopularVehicles,
 };

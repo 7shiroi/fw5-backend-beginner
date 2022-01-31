@@ -8,6 +8,22 @@ exports.getVehicles = (data, cb) => {
   });
 };
 
+exports.getPopularVehicles = (data, cb) => {
+  db.query(`SELECT v.id, v.name, 
+  (SELECT count(*) from histories where histories.id_vehicle = v.id) history_count
+  FROM vehicles v WHERE name LIKE '${data.search}%' HAVING history_count > 0 LIMIT ${data.limit} OFFSET ${data.offset}`, (error, res) => {
+    if (error) throw error;
+    cb(res);
+  });
+};
+exports.getPopularVehiclesCount = (data, cb) => {
+  db.query(`SELECT COUNT(*) rowsCount FROM (SELECT v.id, v.name, 
+  (SELECT count(*) from histories where histories.id_vehicle = v.id) history_count
+  FROM vehicles v WHERE name LIKE '${data.search}%' HAVING history_count > 0 LIMIT ${data.limit} OFFSET ${data.offset}) getPopularVehicleCount`, (error, res) => {
+    if (error) throw error;
+    cb(res);
+  });
+};
 exports.getVehicle = (id, cb) => {
   db.query('SELECT * FROM vehicles WHERE id=?', [id], (error, res) => {
     if (error) throw error;
