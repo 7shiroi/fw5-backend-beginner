@@ -175,15 +175,24 @@ const addVehicle = (req, res) => {
     });
   }
 
-  data.stock = parseInt(data.stock, 10);
-  data.price = parseFloat(data.price, 10);
-  data.is_available = parseInt(data.stock, 10);
-  data.has_prepayment = parseInt(data.stock, 10);
-  vehicleModel.addVehicle(data, (result) => res.json({
-    success: true,
-    message: `${result.affectedRows} vehicle added`,
-    results: data,
-  }));
+  vehicleModel.checkVehicle(data, (result) => {
+    if (result[0].checkCount > 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Data sudah ada!',
+      });
+    }
+
+    data.stock = parseInt(data.stock, 10);
+    data.price = parseFloat(data.price, 10);
+    data.is_available = parseInt(data.stock, 10);
+    data.has_prepayment = parseInt(data.stock, 10);
+    vehicleModel.addVehicle(data, (results) => res.json({
+      success: true,
+      message: `${results.affectedRows} vehicle added`,
+      results: data,
+    }));
+  });
 };
 
 const editVehicle = (req, res) => {
@@ -198,23 +207,32 @@ const editVehicle = (req, res) => {
     });
   }
 
-  vehicleModel.getVehicle(id, (results) => {
-    if (results.length > 0) {
-      data.stock = parseInt(data.stock, 10);
-      data.price = parseFloat(data.price, 10);
-      data.is_available = parseInt(data.stock, 10);
-      data.has_prepayment = parseInt(data.stock, 10);
-      vehicleModel.editVehicle(id, data, () => res.json({
-        success: true,
-        message: `Vehicle with id ${id} has been updated`,
-        results: data,
-      }));
-    } else {
-      return res.status(404).json({
+  vehicleModel.checkVehicle(data, (result) => {
+    if (result[0].checkCount > 0) {
+      return res.status(400).json({
         success: false,
-        message: 'Vehicle not found',
+        error: 'Data sudah ada!',
       });
     }
+
+    vehicleModel.getVehicle(id, (results) => {
+      if (results.length > 0) {
+        data.stock = parseInt(data.stock, 10);
+        data.price = parseFloat(data.price, 10);
+        data.is_available = parseInt(data.stock, 10);
+        data.has_prepayment = parseInt(data.stock, 10);
+        vehicleModel.editVehicle(id, data, () => res.json({
+          success: true,
+          message: `Vehicle with id ${id} has been updated`,
+          results: data,
+        }));
+      } else {
+        return res.status(404).json({
+          success: false,
+          message: 'Vehicle not found',
+        });
+      }
+    });
   });
 };
 

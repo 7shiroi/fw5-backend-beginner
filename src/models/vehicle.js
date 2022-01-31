@@ -38,6 +38,13 @@ exports.getVehicleCount = (data, cb) => {
   });
 };
 
+exports.checkVehicle = (data, cb) => {
+  db.query('SELECT COUNT(*) checkCount from vehicles WHERE name = ? AND category = ? AND color = ?', [data.name, data.category, data.color], (error, res) => {
+    if (error) throw error;
+    cb(res);
+  });
+};
+
 exports.addVehicle = (data, cb) => {
   db.query('INSERT INTO vehicles SET ?', data, (error, res) => {
     if (error) throw error;
