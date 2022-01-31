@@ -2,11 +2,44 @@
 const vehicleModel = require('../models/vehicle');
 
 const getVehicles = (req, res) => {
-  vehicleModel.getVehicles((results) => res.json({
-    success: true,
-    message: 'List Vehicles',
-    results,
-  }));
+  let { search, page, limit } = req.query;
+  search = search || '';
+  page = parseInt(page, 10) || 1;
+  limit = parseInt(limit, 10) || 5;
+  const offset = (page - 1) * limit;
+  const data = { search, offset, limit };
+  vehicleModel.getVehicleCount(data, (count) => {
+    const { rowsCount } = count[0];
+    if (rowsCount > 0) {
+      const lastPage = Math.ceil(rowsCount / limit);
+
+      vehicleModel.getVehicles(data, (results) => {
+        if (results.length > 0) {
+          return res.json({
+            success: true,
+            message: 'List Vehicles',
+            pageInfo: {
+              prev: page > 1 ? `http://localhost:5000/vehicles?search=${search}&page=${page - 1}&limit=${limit}` : null,
+              next: page < lastPage ? `http://localhost:5000/vehicles?search=${search}&page=${page + 1}&limit=${limit}` : null,
+              totalData: rowsCount,
+              currentPage: page,
+              lastPage,
+            },
+            results,
+          });
+        }
+        return res.status(404).json({
+          success: false,
+          message: 'List not found',
+        });
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: 'List not found',
+      });
+    }
+  });
 };
 
 const getVehicle = (req, res) => {
@@ -101,9 +134,14 @@ const addVehicle = (req, res) => {
     });
   }
 
+  data.stock = parseInt(data.stock, 10);
+  data.price = parseFloat(data.price, 10);
+  data.is_available = parseInt(data.stock, 10);
+  data.has_prepayment = parseInt(data.stock, 10);
   vehicleModel.addVehicle(data, (result) => res.json({
     success: true,
     message: `${result.affectedRows} vehicle added`,
+    results: data,
   }));
 };
 
@@ -121,10 +159,14 @@ const editVehicle = (req, res) => {
 
   vehicleModel.getVehicle(id, (results) => {
     if (results.length > 0) {
-      vehicleModel.editVehicle(id, data, (result) => res.json({
+      data.stock = parseInt(data.stock, 10);
+      data.price = parseFloat(data.price, 10);
+      data.is_available = parseInt(data.stock, 10);
+      data.has_prepayment = parseInt(data.stock, 10);
+      vehicleModel.editVehicle(id, data, () => res.json({
         success: true,
-        sql_res: `Affected rows: ${result.affectedRows}`,
         message: `Vehicle with id ${id} has been updated`,
+        results: data,
       }));
     } else {
       return res.status(404).json({
@@ -140,10 +182,10 @@ const deleteVehicle = (req, res) => {
 
   vehicleModel.getVehicle(id, (results) => {
     if (results.length > 0) {
-      vehicleModel.deleteVehicle(id, (result) => res.json({
+      vehicleModel.deleteVehicle(id, () => res.json({
         succes: true,
-        sql_res: `Affected rows: ${result.affectedRows}`,
         message: `Vehicle with id ${id} has been deleted`,
+        results,
       }));
     } else {
       return res.status(404).json({
