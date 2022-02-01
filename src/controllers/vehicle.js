@@ -250,7 +250,7 @@ const deleteVehicle = (req, res) => {
       vehicleModel.deleteVehicle(id, () => res.json({
         succes: true,
         message: `Vehicle with id ${id} has been deleted`,
-        results,
+        data: results,
       }));
     } else {
       return res.status(404).json({
