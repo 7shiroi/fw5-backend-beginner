@@ -60,6 +60,24 @@ const getUser = (req, res) => {
   });
 };
 
+const getProfile = (req, res) => {
+  let { id } = req.params;
+  id = id || 0;
+  userModel.getProfile(id, (results) => {
+    if (results.length > 0) {
+      return res.json({
+        success: true,
+        message: 'User Profile',
+        results: results[0],
+      });
+    }
+    return res.status(404).json({
+      success: false,
+      message: 'User not found',
+    });
+  });
+};
+
 const checkPhoneNumber = (data) => /^[+0]\d+$/.test(data);
 const dateValidation = (data) => /^[^0]\d{3}-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$/.test(data);
 const emailValidation = (data) => /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(data);
@@ -204,4 +222,5 @@ module.exports = {
   addUser,
   editUser,
   deleteUser,
+  getProfile,
 };

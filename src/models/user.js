@@ -21,6 +21,13 @@ exports.getUsersCount = (data, cb) => {
   });
 };
 
+exports.getProfile = (id, cb) => {
+  db.query('SELECT email, name, phone_number, gender, address, display_name, birth_date, picture, YEAR(created_at) active_since FROM users WHERE id=?', [id], (error, res) => {
+    if (error) throw error;
+    cb(res);
+  });
+};
+
 exports.checkIfEmailUsed = (data, cb) => {
   const extraQuery = data.id ? `and id != ${data.id}` : '';
   db.query(`SELECT COUNT(*) rowsCount FROM users WHERE email=? ${extraQuery}`, [data.email], (error, res) => {
