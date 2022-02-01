@@ -4,11 +4,50 @@ const userModel = require('../models/user');
 const vehicleModel = require('../models/vehicle');
 
 const getHistories = (req, res) => {
-  historyModel.getHistories((results) => res.json({
-    success: true,
-    message: 'List Histories',
-    results,
-  }));
+  let {
+    vehicleName, email, page, limit,
+  } = req.query;
+  vehicleName = vehicleName || '';
+  email = email || '';
+  page = page || 1;
+  limit = limit || 5;
+  const offset = (page - 1) * limit;
+  const data = {
+    vehicleName, email, limit, offset,
+  };
+
+  historyModel.getHistoriesCount(data, (count) => {
+    const { rowsCount } = count[0];
+    if (rowsCount > 0) {
+      const lastPage = Math.ceil(rowsCount / limit);
+
+      historyModel.getHistories(data, (results) => {
+        if (results.length > 0) {
+          return res.json({
+            success: true,
+            message: 'List Histories',
+            pageInfo: {
+              prev: page > 1 ? `http://localhost:5000/histories?vehicleName=${vehicleName}&email=${email}&page=${page - 1}&limit=${limit}` : null,
+              next: page < lastPage ? `http://localhost:5000/histories?vehicleName=${vehicleName}&email=${email}&page=${page + 1}&limit=${limit}` : null,
+              totalData: rowsCount,
+              currentPage: page,
+              lastPage,
+            },
+            results,
+          });
+        }
+        return res.status(404).json({
+          success: false,
+          message: 'List not found',
+        });
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: 'List not found',
+      });
+    }
+  });
 };
 
 const getHistory = (req, res) => {
