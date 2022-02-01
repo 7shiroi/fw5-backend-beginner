@@ -2,11 +2,45 @@
 const userModel = require('../models/user');
 
 const getUsers = (req, res) => {
-  userModel.getUsers((results) => res.json({
-    success: true,
-    message: 'List Users',
-    results,
-  }));
+  let { email, page, limit } = req.query;
+  email = email || '';
+  page = page || 1;
+  limit = limit || 5;
+  const offset = (page - 1) * limit;
+  const data = { email, limit, offset };
+
+  userModel.getUsersCount(data, (count) => {
+    const { rowsCount } = count[0];
+    if (rowsCount > 0) {
+      const lastPage = Math.ceil(rowsCount / limit);
+
+      userModel.getUsers(data, (results) => {
+        if (results.length > 0) {
+          return res.json({
+            success: true,
+            message: 'List Users',
+            pageInfo: {
+              prev: page > 1 ? `http://localhost:5000/users?email=${email}&page=${page - 1}&limit=${limit}` : null,
+              next: page < lastPage ? `http://localhost:5000/users?email=${email}&page=${page + 1}&limit=${limit}` : null,
+              totalData: rowsCount,
+              currentPage: page,
+              lastPage,
+            },
+            results,
+          });
+        }
+        return res.status(404).json({
+          success: false,
+          message: 'List not found',
+        });
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: 'List not found',
+      });
+    }
+  });
 };
 
 const getUser = (req, res) => {
@@ -104,13 +138,14 @@ const addUser = (req, res) => {
     userModel.addUser(data, (result) => res.json({
       success: true,
       message: `${result.affectedRows} user added`,
+      results: data,
     }));
   });
 };
 
 const editUser = (req, res) => {
   const data = req.body;
-  data.id = req.params.id;
+  data.id = req.params.id || 0;
   const error = validateDataUser(data);
   if (error.length > 0) {
     return res.status(400).json({
@@ -128,10 +163,10 @@ const editUser = (req, res) => {
             error: 'Email is already used',
           });
         }
-        userModel.editUser(data.id, data, (result) => res.json({
+        userModel.editUser(data.id, data, () => res.json({
           success: true,
-          sql_res: `Affected rows: ${result.affectedRows}`,
           message: `User with id ${data.id} has been updated`,
+          results: data,
         }));
       });
     } else {
@@ -144,14 +179,15 @@ const editUser = (req, res) => {
 };
 
 const deleteUser = (req, res) => {
-  const { id } = req.params;
+  let { id } = req.params;
+  id = id || 0;
 
   userModel.getUser(id, (results) => {
     if (results.length > 0) {
-      userModel.deleteUser(id, (result) => res.json({
-        succes: true,
-        sql_res: `Affected rows: ${result.affectedRows}`,
+      userModel.deleteUser(id, () => res.json({
+        success: true,
         message: `User with id ${id} has been deleted`,
+        data: results,
       }));
     } else {
       return res.status(404).json({

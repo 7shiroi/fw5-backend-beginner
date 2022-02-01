@@ -1,7 +1,7 @@
 const db = require('../helpers/db');
 
-exports.getUsers = (cb) => {
-  db.query('SELECT * FROM users', (error, res) => {
+exports.getUsers = (data, cb) => {
+  db.query(`SELECT * FROM users WHERE email LIKE '${data.email}%' LIMIT ${data.limit} OFFSET ${data.offset}`, (error, res) => {
     if (error) throw error;
     cb(res);
   });
@@ -9,6 +9,13 @@ exports.getUsers = (cb) => {
 
 exports.getUser = (id, cb) => {
   db.query('SELECT * FROM users WHERE id=?', [id], (error, res) => {
+    if (error) throw error;
+    cb(res);
+  });
+};
+
+exports.getUsersCount = (data, cb) => {
+  db.query(`SELECT COUNT(*) rowsCount FROM users WHERE email LIKE '${data.email}%'`, (error, res) => {
     if (error) throw error;
     cb(res);
   });
