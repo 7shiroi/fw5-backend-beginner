@@ -6,10 +6,8 @@ const {
   addVehicle,
   editVehicle,
   deleteVehicle,
-  getPopularVehicles,
 } = require('../controllers/vehicle');
 
-vehicle.get('/popular', getPopularVehicles);
 vehicle.get('/', getVehicles);
 vehicle.get('/:id', getVehicle);
 vehicle.post('/', addVehicle);
