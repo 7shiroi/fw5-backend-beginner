@@ -2,6 +2,7 @@ const route = require('express').Router();
 const { getPopularVehicles } = require('../controllers/vehicle');
 const { getProfile } = require('../controllers/user');
 
+route.use('/category', require('./category'));
 route.use('/vehicle', require('./vehicle'));
 route.use('/user', require('./user'));
 route.use('/history', require('./history'));
