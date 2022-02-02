@@ -82,6 +82,28 @@ const compareDate = (start, end) => {
   return 0;
 };
 
+const cekUser = (data) => new Promise((resolve, reject) => {
+  userModel.getUser(data.id_user, (res) => {
+    if (res.length > 0) {
+      resolve();
+    } else {
+      // eslint-disable-next-line prefer-promise-reject-errors
+      reject('User tidak ditemukan');
+    }
+  });
+});
+
+const cekVehicle = (data) => new Promise((resolve, reject) => {
+  vehicleModel.getVehicle(data.id_vehicle, (res) => {
+    if (res.length > 0) {
+      resolve();
+    } else {
+      // eslint-disable-next-line prefer-promise-reject-errors
+      reject('Kendaraan tidak ditemukan');
+    }
+  });
+});
+
 // eslint-disable-next-line require-jsdoc
 function validateDataHistory(data) {
   // expected data {id_user (fk), id_vehicle (fk), date_start, date_end,
@@ -148,26 +170,33 @@ const addHistory = (req, res) => {
     });
   }
 
-  userModel.getUser(data.id_user, (resultUser) => {
-    if (resultUser.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'user tidak ditemukan',
+  cekUser(data).then(() => {
+    cekVehicle(data).then(() => {
+      vehicleModel.getVehicle(data.id_vehicle, (resultVehicle) => {
+        if (resultVehicle.length === 0) {
+          return res.status(400).json({
+            success: false,
+            error: 'Kendaraan tidak ditemukan',
+          });
+        }
+        data.id_user = parseInt(data.id_user, 10);
+        data.id_vehicle = parseInt(data.id_vehicle, 10);
+        data.has_returned = parseInt(data.has_returned, 10);
+        data.prepayment = parseFloat(data.prepayment, 10);
+        historyModel.addHistory(data, (result) => res.json({
+          success: true,
+          message: `${result.affectedRows} history added`,
+          data,
+        }));
       });
-    }
-    vehicleModel.getVehicle(data.id_vehicle, (resultVehicle) => {
-      if (resultVehicle.length === 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'Kendaraan tidak ditemukan',
-        });
-      }
-      historyModel.addHistory(data, (result) => res.json({
-        success: true,
-        message: `${result.affectedRows} history added`,
-      }));
-    });
-  });
+    }).catch((errMsg) => res.status(400).json({
+      success: false,
+      error: errMsg,
+    }));
+  }).catch((errMsg) => res.status(400).json({
+    success: false,
+    error: errMsg,
+  }));
 };
 
 const editHistory = (req, res) => {
@@ -181,36 +210,43 @@ const editHistory = (req, res) => {
     });
   }
 
-  userModel.getUser(data.id_user, (resultUser) => {
-    if (resultUser.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'user tidak ditemukan',
-      });
-    }
-    vehicleModel.getVehicle(data.id_vehicle, (resultVehicle) => {
-      if (resultVehicle.length === 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'Kendaraan tidak ditemukan',
-        });
-      }
-      historyModel.getHistory(id, (results) => {
-        if (results.length > 0) {
-          historyModel.editHistory(id, data, (result) => res.json({
-            success: true,
-            sql_res: `Affected rows: ${result.affectedRows}`,
-            message: `History with id ${id} has been updated`,
-          }));
-        } else {
-          return res.status(404).json({
+  cekUser(data).then(() => {
+    cekVehicle(data).then(() => {
+      vehicleModel.getVehicle(data.id_vehicle, (resultVehicle) => {
+        if (resultVehicle.length === 0) {
+          return res.status(400).json({
             success: false,
-            message: 'History not found',
+            error: 'Kendaraan tidak ditemukan',
           });
         }
+        historyModel.getHistory(id, (results) => {
+          if (results.length > 0) {
+            data.id_history = parseInt(id, 10);
+            data.id_user = parseInt(data.id_user, 10);
+            data.id_vehicle = parseInt(data.id_vehicle, 10);
+            data.has_returned = parseInt(data.has_returned, 10);
+            data.prepayment = parseFloat(data.prepayment, 10);
+            historyModel.editHistory(id, data, () => res.json({
+              success: true,
+              message: `History with id ${id} has been updated`,
+              data,
+            }));
+          } else {
+            return res.status(404).json({
+              success: false,
+              message: 'History not found',
+            });
+          }
+        });
       });
-    });
-  });
+    }).catch((errMsg) => res.status(400).json({
+      success: false,
+      error: errMsg,
+    }));
+  }).catch((errMsg) => res.status(400).json({
+    success: false,
+    error: errMsg,
+  }));
 };
 
 const deleteHistory = (req, res) => {
@@ -218,10 +254,10 @@ const deleteHistory = (req, res) => {
 
   historyModel.getHistory(id, (results) => {
     if (results.length > 0) {
-      historyModel.deleteHistory(id, (result) => res.json({
-        succes: true,
-        sql_res: `Affected rows: ${result.affectedRows}`,
+      historyModel.deleteHistory(id, () => res.json({
+        success: true,
         message: `History with id ${id} has been deleted`,
+        data: results[0],
       }));
     } else {
       return res.status(404).json({
