@@ -129,7 +129,7 @@ function validateDataVehicle(data) {
   if (data.name === undefined || data.name.length > 100) {
     error.push('Input nama terlalu panjang!');
   }
-  if (data.category_id === undefined || !checkIntegerFormat(data.category_id)) {
+  if (data.id_category === undefined || !checkIntegerFormat(data.id_category)) {
     error.push('Input parameter kategori salah!');
   }
   if (data.color === undefined || data.color.length === 0) {
@@ -191,7 +191,7 @@ const addVehicle = (req, res) => {
     });
   }
 
-  cekCategory(data.category_id).then(() => {
+  cekCategory(data.id_category).then(() => {
     vehicleModel.checkVehicle(data, (result) => {
       if (result[0].checkCount > 0) {
         return res.status(400).json({
@@ -199,7 +199,7 @@ const addVehicle = (req, res) => {
           error: 'Data sudah ada!',
         });
       }
-      data.category_id = parseInt(data.category_id, 10);
+      data.id_category = parseInt(data.id_category, 10);
       data.stock = parseInt(data.stock, 10);
       data.price = parseFloat(data.price, 10);
       data.is_available = parseInt(data.is_available, 10);
@@ -228,7 +228,7 @@ const editVehicle = (req, res) => {
     });
   }
 
-  cekCategory(data.category_id).then(() => {
+  cekCategory(data.id_category).then(() => {
     vehicleModel.checkVehicle(data, (result) => {
       if (result[0].checkCount > 0) {
         return res.status(400).json({
@@ -239,7 +239,7 @@ const editVehicle = (req, res) => {
 
       vehicleModel.getVehicle(id, (results) => {
         if (results.length > 0) {
-          data.category_id = parseInt(data.category_id, 10);
+          data.id_category = parseInt(data.id_category, 10);
           data.stock = parseInt(data.stock, 10);
           data.price = parseFloat(data.price, 10);
           data.is_available = parseInt(data.is_available, 10);
