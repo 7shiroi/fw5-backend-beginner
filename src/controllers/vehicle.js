@@ -1,5 +1,6 @@
 /* eslint-disable consistent-return */
 const vehicleModel = require('../models/vehicle');
+const categoryModel = require('../models/category');
 
 const getVehicles = (req, res) => {
   let { search, page, limit } = req.query;
@@ -105,6 +106,17 @@ const checkPriceFormat = (data) => /^[^-0+]\d+.\d{2}?$/.test(data) || /^0$/.test
 const checkBoolean = (data) => /^[01]$/.test(data);
 const timeValidation = (data) => /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(data);
 
+const cekCategory = (categoryId) => new Promise((resolve, reject) => {
+  categoryModel.getCategory(categoryId, (res) => {
+    if (res.length > 0) {
+      resolve();
+    } else {
+      // eslint-disable-next-line prefer-promise-reject-errors
+      reject('Kategori tidak ditemukan');
+    }
+  });
+});
+
 // eslint-disable-next-line require-jsdoc
 function validateDataVehicle(data) {
   // expected data {name, color, location, stock, price, capacity, is_available(0,1),
@@ -117,10 +129,8 @@ function validateDataVehicle(data) {
   if (data.name === undefined || data.name.length > 100) {
     error.push('Input nama terlalu panjang!');
   }
-  if (data.category === undefined || data.category.length === 0) {
+  if (data.category_id === undefined || !checkIntegerFormat(data.category_id)) {
     error.push('Input parameter kategori salah!');
-  } else if (data.category.length > 30) {
-    error.push('Input kategori terlalu panjang!');
   }
   if (data.color === undefined || data.color.length === 0) {
     error.push('Input parameter warna salah!');
@@ -181,24 +191,29 @@ const addVehicle = (req, res) => {
     });
   }
 
-  vehicleModel.checkVehicle(data, (result) => {
-    if (result[0].checkCount > 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Data sudah ada!',
-      });
-    }
-
-    data.stock = parseInt(data.stock, 10);
-    data.price = parseFloat(data.price, 10);
-    data.is_available = parseInt(data.stock, 10);
-    data.has_prepayment = parseInt(data.stock, 10);
-    vehicleModel.addVehicle(data, (results) => res.json({
-      success: true,
-      message: `${results.affectedRows} vehicle added`,
-      results: data,
-    }));
-  });
+  cekCategory(data.category_id).then(() => {
+    vehicleModel.checkVehicle(data, (result) => {
+      if (result[0].checkCount > 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Data sudah ada!',
+        });
+      }
+      data.category_id = parseInt(data.category_id, 10);
+      data.stock = parseInt(data.stock, 10);
+      data.price = parseFloat(data.price, 10);
+      data.is_available = parseInt(data.is_available, 10);
+      data.has_prepayment = parseInt(data.has_prepayment, 10);
+      vehicleModel.addVehicle(data, (results) => res.json({
+        success: true,
+        message: `${results.affectedRows} vehicle added`,
+        results: data,
+      }));
+    });
+  }).catch((errMsg) => res.status(400).json({
+    success: false,
+    error: errMsg,
+  }));
 };
 
 const editVehicle = (req, res) => {
@@ -213,33 +228,39 @@ const editVehicle = (req, res) => {
     });
   }
 
-  vehicleModel.checkVehicle(data, (result) => {
-    if (result[0].checkCount > 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Data sudah ada!',
-      });
-    }
-
-    vehicleModel.getVehicle(id, (results) => {
-      if (results.length > 0) {
-        data.stock = parseInt(data.stock, 10);
-        data.price = parseFloat(data.price, 10);
-        data.is_available = parseInt(data.stock, 10);
-        data.has_prepayment = parseInt(data.stock, 10);
-        vehicleModel.editVehicle(id, data, () => res.json({
-          success: true,
-          message: `Vehicle with id ${id} has been updated`,
-          results: data,
-        }));
-      } else {
-        return res.status(404).json({
+  cekCategory(data.category_id).then(() => {
+    vehicleModel.checkVehicle(data, (result) => {
+      if (result[0].checkCount > 0) {
+        return res.status(400).json({
           success: false,
-          message: 'Vehicle not found',
+          error: 'Data sudah ada!',
         });
       }
+
+      vehicleModel.getVehicle(id, (results) => {
+        if (results.length > 0) {
+          data.category_id = parseInt(data.category_id, 10);
+          data.stock = parseInt(data.stock, 10);
+          data.price = parseFloat(data.price, 10);
+          data.is_available = parseInt(data.is_available, 10);
+          data.has_prepayment = parseInt(data.has_prepayment, 10);
+          vehicleModel.editVehicle(id, data, () => res.json({
+            success: true,
+            message: `Vehicle with id ${id} has been updated`,
+            results: data,
+          }));
+        } else {
+          return res.status(404).json({
+            success: false,
+            message: 'Vehicle not found',
+          });
+        }
+      });
     });
-  });
+  }).catch((errMsg) => res.status(400).json({
+    success: false,
+    error: errMsg,
+  }));
 };
 
 const deleteVehicle = (req, res) => {
