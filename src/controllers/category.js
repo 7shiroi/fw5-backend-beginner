@@ -19,8 +19,8 @@ const getCategories = (req, res) => {
             success: true,
             message: 'List Categories',
             pageInfo: {
-              prev: page > 1 ? `http://localhost:5000/categorys?search=${search}&page=${page - 1}&limit=${limit}` : null,
-              next: page < lastPage ? `http://localhost:5000/categorys?search=${search}&page=${page + 1}&limit=${limit}` : null,
+              prev: page > 1 ? `http://localhost:5000/category?search=${search}&page=${page - 1}&limit=${limit}` : null,
+              next: page < lastPage ? `http://localhost:5000/category?search=${search}&page=${page + 1}&limit=${limit}` : null,
               totalData: rowsCount,
               currentPage: page,
               lastPage,

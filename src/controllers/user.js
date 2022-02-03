@@ -20,8 +20,8 @@ const getUsers = (req, res) => {
             success: true,
             message: 'List Users',
             pageInfo: {
-              prev: page > 1 ? `http://localhost:5000/users?email=${email}&page=${page - 1}&limit=${limit}` : null,
-              next: page < lastPage ? `http://localhost:5000/users?email=${email}&page=${page + 1}&limit=${limit}` : null,
+              prev: page > 1 ? `http://localhost:5000/user?email=${email}&page=${page - 1}&limit=${limit}` : null,
+              next: page < lastPage ? `http://localhost:5000/user?email=${email}&page=${page + 1}&limit=${limit}` : null,
               totalData: rowsCount,
               currentPage: page,
               lastPage,

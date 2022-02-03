@@ -27,8 +27,8 @@ const getHistories = (req, res) => {
             success: true,
             message: 'List Histories',
             pageInfo: {
-              prev: page > 1 ? `http://localhost:5000/histories?vehicleName=${vehicleName}&email=${email}&page=${page - 1}&limit=${limit}` : null,
-              next: page < lastPage ? `http://localhost:5000/histories?vehicleName=${vehicleName}&email=${email}&page=${page + 1}&limit=${limit}` : null,
+              prev: page > 1 ? `http://localhost:5000/history?vehicleName=${vehicleName}&email=${email}&page=${page - 1}&limit=${limit}` : null,
+              next: page < lastPage ? `http://localhost:5000/history?vehicleName=${vehicleName}&email=${email}&page=${page + 1}&limit=${limit}` : null,
               totalData: rowsCount,
               currentPage: page,
               lastPage,
