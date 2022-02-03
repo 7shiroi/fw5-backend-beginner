@@ -163,14 +163,13 @@ const cekCategory = (categoryId) => new Promise((resolve, reject) => {
 
 // eslint-disable-next-line require-jsdoc
 function validateDataVehicle(data) {
-  // expected data {name, color, location, stock, price, capacity, is_available(0,1),
-  // has_repayment(0,1), reservation_deadline check string format (00.00)}
+  // expected data {name, id_category, color, location, stock, price, capacity, is_available(0,1),
+  // has_prepayment(0,1), reservation_deadline check string format (00.00)}
   const error = [];
 
   if (data.name === undefined || data.name.length === 0) {
     error.push('Input parameter nama salah!');
-  }
-  if (data.name === undefined || data.name.length > 100) {
+  } else if (data.name.length > 100) {
     error.push('Input nama terlalu panjang!');
   }
   if (data.id_category === undefined || !checkIntegerFormat(data.id_category)) {
