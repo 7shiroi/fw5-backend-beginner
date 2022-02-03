@@ -27,8 +27,8 @@ exports.getVehicles = (data, cb) => {
 };
 
 exports.getPopularVehicles = (data, cb) => {
-  db.query(`SELECT v.id, v.name, 
-  (SELECT count(*) from histories where histories.id_vehicle = v.id) history_count
+  db.query(`SELECT v.id, v.name, c.name category,
+  (SELECT count(*) from histories where histories.id_vehicle = v.id AND DATEDIFF(CURRENT_DATE, date_start) < 31) history_count
   FROM vehicles v 
   LEFT JOIN categories c on v.id_category = c.id
   WHERE v.name LIKE '${data.search}%'
@@ -43,7 +43,7 @@ exports.getPopularVehicles = (data, cb) => {
 };
 exports.getPopularVehiclesCount = (data, cb) => {
   db.query(`SELECT COUNT(*) rowsCount FROM (SELECT v.id, v.name, 
-  (SELECT count(*) from histories where histories.id_vehicle = v.id) history_count
+  (SELECT count(*) from histories where histories.id_vehicle = v.id AND DATEDIFF(CURRENT_DATE, date_start) < 31) history_count
   FROM vehicles v 
   LEFT JOIN categories c on v.id_category = c.id
   WHERE v.name LIKE '${data.search}%'
