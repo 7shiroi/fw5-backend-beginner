@@ -20,8 +20,8 @@ const getVehicles = (req, res) => {
             success: true,
             message: 'List Vehicles',
             pageInfo: {
-              prev: page > 1 ? `http://localhost:5000/vehicles?search=${search}&page=${page - 1}&limit=${limit}` : null,
-              next: page < lastPage ? `http://localhost:5000/vehicles?search=${search}&page=${page + 1}&limit=${limit}` : null,
+              prev: page > 1 ? `http://localhost:5000/vehicle?search=${search}&page=${page - 1}&limit=${limit}` : null,
+              next: page < lastPage ? `http://localhost:5000/vehicle?search=${search}&page=${page + 1}&limit=${limit}` : null,
               totalData: rowsCount,
               currentPage: page,
               lastPage,
@@ -78,8 +78,52 @@ const getPopularVehicles = (req, res) => {
             success: true,
             message: 'List Vehicles',
             pageInfo: {
-              prev: page > 1 ? `http://localhost:5000/vehicles?search=${search}&page=${page - 1}&limit=${limit}` : null,
-              next: page < lastPage ? `http://localhost:5000/vehicles?search=${search}&page=${page + 1}&limit=${limit}` : null,
+              prev: page > 1 ? `http://localhost:5000/vehicle?search=${search}&page=${page - 1}&limit=${limit}` : null,
+              next: page < lastPage ? `http://localhost:5000/vehicle?search=${search}&page=${page + 1}&limit=${limit}` : null,
+              totalData: rowsCount,
+              currentPage: page,
+              lastPage,
+            },
+            results,
+          });
+        }
+        return res.status(404).json({
+          success: false,
+          message: 'List not found',
+        });
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: 'List not found',
+      });
+    }
+  });
+};
+
+const getVehiclesFromCategory = (req, res) => {
+  let { page, limit } = req.query;
+  // eslint-disable-next-line camelcase
+  const { id } = req.params;
+  page = parseInt(page, 10) || 1;
+  limit = parseInt(limit, 10) || 5;
+  const offset = (page - 1) * limit;
+  // eslint-disable-next-line camelcase
+  const data = { offset, limit };
+  data.id_category = id;
+  vehicleModel.getVehiclesFromCategoryCount(data, (count) => {
+    const { rowsCount } = count[0];
+    if (rowsCount > 0) {
+      const lastPage = Math.ceil(rowsCount / limit);
+
+      vehicleModel.getVehiclesFromCategory(data, (results) => {
+        if (results.length > 0) {
+          return res.json({
+            success: true,
+            message: 'List Vehicles',
+            pageInfo: {
+              prev: page > 1 ? `http://localhost:5000/vehicle/category/${data.id_category}?page=${page - 1}&limit=${limit}` : null,
+              next: page < lastPage ? `http://localhost:5000/vehicle/category/${data.id_category}?page=${page + 1}&limit=${limit}` : null,
               totalData: rowsCount,
               currentPage: page,
               lastPage,
@@ -289,4 +333,5 @@ module.exports = {
   editVehicle,
   deleteVehicle,
   getPopularVehicles,
+  getVehiclesFromCategory,
 };

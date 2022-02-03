@@ -88,6 +88,37 @@ exports.getVehicleCount = (data, cb) => {
   });
 };
 
+exports.getVehiclesFromCategory = (data, cb) => {
+  db.query(`SELECT 
+    v.id, 
+    v.name, 
+    c.name category, 
+    v.color, 
+    v.location, 
+    v.stock, 
+    v.price, 
+    v.capacity, 
+    v.is_available, 
+    v.has_prepayment, 
+    v.reservation_deadline 
+  FROM vehicles v
+  LEFT JOIN categories c on v.id_category = c.id
+  WHERE c.id=${data.id_category}
+  LIMIT ${data.limit} OFFSET ${data.offset}`, (error, res) => {
+    if (error) throw error;
+    cb(res);
+  });
+};
+
+exports.getVehiclesFromCategoryCount = (data, cb) => {
+  db.query(`SELECT COUNT(*) rowsCount FROM vehicles v
+  LEFT JOIN categories c on v.id_category = c.id
+  WHERE c.id=${data.id_category}`, (error, res) => {
+    if (error) throw error;
+    cb(res);
+  });
+};
+
 exports.checkVehicle = (data, cb) => {
   db.query(`SELECT COUNT(*) checkCount from vehicles v
   LEFT JOIN categories c on v.id_category = c.id 
