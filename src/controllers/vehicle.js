@@ -51,8 +51,8 @@ const getVehicles = (req, res) => {
             success: true,
             message: 'List Vehicles',
             pageInfo: {
-              prev: page > 1 ? `http://localhost:5000/vehicle?search=${search}&page=${page - 1}&limit=${limit}` : null,
-              next: page < lastPage ? `http://localhost:5000/vehicle?search=${search}&page=${page + 1}&limit=${limit}` : null,
+              prev: page > 1 ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page - 1}&limit=${limit}` : null,
+              next: page < lastPage ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page + 1}&limit=${limit}` : null,
               totalData: rowsCount,
               currentPage: page,
               lastPage,
@@ -140,8 +140,8 @@ const getPopularVehicles = (req, res) => {
             success: true,
             message: 'List Vehicles',
             pageInfo: {
-              prev: page > 1 ? `http://localhost:5000/vehicle?search=${search}&page=${page - 1}&limit=${limit}` : null,
-              next: page < lastPage ? `http://localhost:5000/vehicle?search=${search}&page=${page + 1}&limit=${limit}` : null,
+              prev: page > 1 ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page - 1}&limit=${limit}` : null,
+              next: page < lastPage ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page + 1}&limit=${limit}` : null,
               totalData: rowsCount,
               currentPage: page,
               lastPage,
