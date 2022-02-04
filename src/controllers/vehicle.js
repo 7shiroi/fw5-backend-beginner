@@ -12,16 +12,16 @@ const getVehicles = (req, res) => {
   isAvailable = isAvailable || '';
   hasPrepayment = hasPrepayment || '';
 
-  if (['color', 'price', 'capacity', 'stock', 'category'].includes(sort.toLowerCase())) {
+  if (!['color', 'price', 'capacity', 'stock', 'category'].includes(sort.toLowerCase())) {
     sort = 'name';
   }
   if (order.toLowerCase() !== 'asc') {
     order = 'desc';
   }
-  if ([0, 1].includes(isAvailable)) {
+  if (![0, 1].includes(parseInt(isAvailable, 10))) {
     isAvailable = '';
   }
-  if ([0, 1].includes(hasPrepayment)) {
+  if (![0, 1].includes(parseInt(hasPrepayment, 10))) {
     hasPrepayment = '';
   }
 
@@ -101,16 +101,16 @@ const getPopularVehicles = (req, res) => {
   isAvailable = isAvailable || '';
   hasPrepayment = hasPrepayment || '';
 
-  if (['color', 'price', 'capacity', 'stock', 'category'].includes(sort.toLowerCase())) {
+  if (!['color', 'price', 'capacity', 'stock', 'category'].includes(sort.toLowerCase())) {
     sort = 'name';
   }
   if (order.toLowerCase() !== 'asc') {
     order = 'desc';
   }
-  if ([0, 1].includes(isAvailable)) {
+  if (![0, 1].includes(parseInt(isAvailable, 10))) {
     isAvailable = '';
   }
-  if ([0, 1].includes(hasPrepayment)) {
+  if (![0, 1].includes(parseInt(hasPrepayment, 10))) {
     hasPrepayment = '';
   }
 
