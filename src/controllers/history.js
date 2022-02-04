@@ -96,7 +96,7 @@ const cekUser = (data) => new Promise((resolve, reject) => {
 const cekVehicle = (data) => new Promise((resolve, reject) => {
   vehicleModel.getVehicle(data.id_vehicle, (res) => {
     if (res.length > 0) {
-      resolve();
+      resolve(res[0]);
     } else {
       // eslint-disable-next-line prefer-promise-reject-errors
       reject('Kendaraan tidak ditemukan');
@@ -171,28 +171,41 @@ const addHistory = (req, res) => {
   }
 
   cekUser(data).then(() => {
-    cekVehicle(data).then(() => {
-      vehicleModel.getVehicle(data.id_vehicle, (resultVehicle) => {
-        if (resultVehicle.length === 0) {
+    cekVehicle(data).then((dataVehicle) => {
+      if (dataVehicle.is_available === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Kendaraan tidak tersedia',
+        });
+      }
+      if (dataVehicle.has_prepayment === 1) {
+        const maxPrepayment = dataVehicle.price; // prepayment max = vehicle price
+        // eslint-disable-next-line max-len
+        const minPrepayment = dataVehicle.price * (20 / 100); // prepayment minimal 20% of vehicle price
+        if (
+          data.prepayment === undefined
+          || data.prepayment < minPrepayment
+          || data.prepayment > maxPrepayment
+        ) {
           return res.status(400).json({
             success: false,
-            error: 'Kendaraan tidak ditemukan',
+            error: `Input parameter Prepayment salah! Prepayment minimal = ${minPrepayment}, Prepayment maximal = ${maxPrepayment}`,
           });
         }
-        data.id_user = parseInt(data.id_user, 10);
-        data.id_vehicle = parseInt(data.id_vehicle, 10);
-        if (data.has_returned) {
-          data.has_returned = parseInt(data.has_returned, 10);
-        }
-        if (data.prepayment) {
-          data.prepayment = parseFloat(data.prepayment, 10);
-        }
-        historyModel.addHistory(data, (result) => res.json({
-          success: true,
-          message: `${result.affectedRows} history added`,
-          data,
-        }));
-      });
+      }
+      data.id_user = parseInt(data.id_user, 10);
+      data.id_vehicle = parseInt(data.id_vehicle, 10);
+      if (data.has_returned) {
+        data.has_returned = parseInt(data.has_returned, 10);
+      }
+      if (data.prepayment) {
+        data.prepayment = parseFloat(data.prepayment, 10);
+      }
+      historyModel.addHistory(data, (result) => res.json({
+        success: true,
+        message: `${result.affectedRows} history added`,
+        data,
+      }));
     }).catch((errMsg) => res.status(400).json({
       success: false,
       error: errMsg,
@@ -215,37 +228,49 @@ const editHistory = (req, res) => {
   }
 
   cekUser(data).then(() => {
-    cekVehicle(data).then(() => {
-      vehicleModel.getVehicle(data.id_vehicle, (resultVehicle) => {
-        if (resultVehicle.length === 0) {
+    cekVehicle(data).then((dataVehicle) => {
+      if (dataVehicle.is_available === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Kendaraan tidak tersedia',
+        });
+      }
+      if (dataVehicle.has_prepayment === 1) {
+        const maxPrepayment = dataVehicle.price; // prepayment max = vehicle price
+        // eslint-disable-next-line max-len
+        const minPrepayment = dataVehicle.price * (20 / 100); // prepayment minimal 20% of vehicle price
+        if (
+          data.prepayment === undefined
+            || data.prepayment < minPrepayment
+            || data.prepayment > maxPrepayment
+        ) {
           return res.status(400).json({
             success: false,
-            error: 'Kendaraan tidak ditemukan',
+            error: `Input parameter Prepayment salah! Prepayment minimal = ${minPrepayment}, Prepayment maximal = ${maxPrepayment}`,
           });
         }
-        historyModel.getHistory(id, (results) => {
-          if (results.length > 0) {
-            data.id_history = parseInt(id, 10);
-            data.id_user = parseInt(data.id_user, 10);
-            data.id_vehicle = parseInt(data.id_vehicle, 10);
-            if (data.has_returned) {
-              data.has_returned = parseInt(data.has_returned, 10);
-            }
-            if (data.prepayment) {
-              data.prepayment = parseFloat(data.prepayment, 10);
-            }
-            historyModel.editHistory(id, data, () => res.json({
-              success: true,
-              message: `History with id ${id} has been updated`,
-              data,
-            }));
-          } else {
-            return res.status(404).json({
-              success: false,
-              message: 'History not found',
-            });
+      }
+      historyModel.getHistory(id, (results) => {
+        if (results.length > 0) {
+          data.id_user = parseInt(data.id_user, 10);
+          data.id_vehicle = parseInt(data.id_vehicle, 10);
+          if (data.has_returned) {
+            data.has_returned = parseInt(data.has_returned, 10);
           }
-        });
+          if (data.prepayment) {
+            data.prepayment = parseFloat(data.prepayment, 10);
+          }
+          historyModel.editHistory(id, data, () => res.json({
+            success: true,
+            message: `History with id ${id} has been updated`,
+            data: { id_history: id, data },
+          }));
+        } else {
+          return res.status(404).json({
+            success: false,
+            message: 'History not found',
+          });
+        }
       });
     }).catch((errMsg) => res.status(400).json({
       success: false,
