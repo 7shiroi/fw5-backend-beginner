@@ -174,9 +174,13 @@ exports.getVehiclesFromCategoryCount = (data, cb) => {
 };
 
 exports.checkVehicle = (data, cb) => {
+  let extraQueryWhere = '';
+  if (data.id) {
+    extraQueryWhere += `AND v.id != ${data.id}`;
+  }
   db.query(`SELECT COUNT(*) checkCount from vehicles v
   LEFT JOIN categories c on v.id_category = c.id 
-  WHERE v.name = ? AND c.id = ? AND v.color = ?`, [data.name, data.id_category, data.color], (error, res) => {
+  WHERE v.name = ? AND c.id = ? AND v.color = ? ${extraQueryWhere}`, [data.name, data.id_category, data.color], (error, res) => {
     if (error) throw error;
     cb(res);
   });

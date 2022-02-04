@@ -324,6 +324,7 @@ const addVehicle = (req, res) => {
 const editVehicle = (req, res) => {
   const { id } = req.params;
   const data = req.body;
+  data.id = id;
   //   expected body {name, type, merk, stock, price}
   const error = validateDataVehicle(data);
   if (error.length > 0) {
