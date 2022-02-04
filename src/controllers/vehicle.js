@@ -3,12 +3,43 @@ const vehicleModel = require('../models/vehicle');
 const categoryModel = require('../models/category');
 
 const getVehicles = (req, res) => {
-  let { search, page, limit } = req.query;
+  let {
+    search, sort, order, page, limit, isAvailable, hasPrepayment,
+  } = req.query;
+
+  sort = sort || 'name';
+  order = order || 'asc';
+  isAvailable = isAvailable || '';
+  hasPrepayment = hasPrepayment || '';
+
+  if (['color', 'price', 'capacity', 'stock', 'category'].includes(sort.toLowerCase())) {
+    sort = 'name';
+  }
+  if (order.toLowerCase() !== 'asc') {
+    order = 'desc';
+  }
+  if ([0, 1].includes(isAvailable)) {
+    isAvailable = '';
+  }
+  if ([0, 1].includes(hasPrepayment)) {
+    hasPrepayment = '';
+  }
+
   search = search || '';
   page = parseInt(page, 10) || 1;
   limit = parseInt(limit, 10) || 5;
+
+  if (page < 1) {
+    page = 1;
+  }
+  if (limit < 1) {
+    limit = 5;
+  }
+
   const offset = (page - 1) * limit;
-  const data = { search, offset, limit };
+  const data = {
+    search, sort, order, isAvailable, hasPrepayment, offset, limit,
+  };
   vehicleModel.getVehicleCount(data, (count) => {
     const { rowsCount } = count[0];
     if (rowsCount > 0) {
@@ -61,12 +92,43 @@ const getVehicle = (req, res) => {
 };
 
 const getPopularVehicles = (req, res) => {
-  let { search, page, limit } = req.query;
+  let {
+    search, sort, order, page, limit, isAvailable, hasPrepayment,
+  } = req.query;
+
+  sort = sort || 'name';
+  order = order || 'asc';
+  isAvailable = isAvailable || '';
+  hasPrepayment = hasPrepayment || '';
+
+  if (['color', 'price', 'capacity', 'stock', 'category'].includes(sort.toLowerCase())) {
+    sort = 'name';
+  }
+  if (order.toLowerCase() !== 'asc') {
+    order = 'desc';
+  }
+  if ([0, 1].includes(isAvailable)) {
+    isAvailable = '';
+  }
+  if ([0, 1].includes(hasPrepayment)) {
+    hasPrepayment = '';
+  }
+
   search = search || '';
   page = parseInt(page, 10) || 1;
   limit = parseInt(limit, 10) || 5;
+
+  if (page < 1) {
+    page = 1;
+  }
+  if (limit < 1) {
+    limit = 5;
+  }
+
   const offset = (page - 1) * limit;
-  const data = { search, offset, limit };
+  const data = {
+    search, sort, order, isAvailable, hasPrepayment, offset, limit,
+  };
   vehicleModel.getPopularVehiclesCount(data, (count) => {
     const { rowsCount } = count[0];
     if (rowsCount > 0) {
