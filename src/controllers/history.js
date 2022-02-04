@@ -181,8 +181,12 @@ const addHistory = (req, res) => {
         }
         data.id_user = parseInt(data.id_user, 10);
         data.id_vehicle = parseInt(data.id_vehicle, 10);
-        data.has_returned = parseInt(data.has_returned, 10);
-        data.prepayment = parseFloat(data.prepayment, 10);
+        if (data.has_returned) {
+          data.has_returned = parseInt(data.has_returned, 10);
+        }
+        if (data.prepayment) {
+          data.prepayment = parseFloat(data.prepayment, 10);
+        }
         historyModel.addHistory(data, (result) => res.json({
           success: true,
           message: `${result.affectedRows} history added`,
@@ -224,8 +228,12 @@ const editHistory = (req, res) => {
             data.id_history = parseInt(id, 10);
             data.id_user = parseInt(data.id_user, 10);
             data.id_vehicle = parseInt(data.id_vehicle, 10);
-            data.has_returned = parseInt(data.has_returned, 10);
-            data.prepayment = parseFloat(data.prepayment, 10);
+            if (data.has_returned) {
+              data.has_returned = parseInt(data.has_returned, 10);
+            }
+            if (data.prepayment) {
+              data.prepayment = parseFloat(data.prepayment, 10);
+            }
             historyModel.editHistory(id, data, () => res.json({
               success: true,
               message: `History with id ${id} has been updated`,
