@@ -2,6 +2,35 @@
 const vehicleModel = require('../models/vehicle');
 const categoryModel = require('../models/category');
 
+const checkIntegerFormat = (data) => /^[1-9][0-9]*/.test(data); // check apakah data isinya hanya digit yang awalnya bukan 0
+const checkPriceFormat = (data) => /^[^-0+]\d+.\d{2}?$/.test(data) || /^0$/.test(data);
+const checkBoolean = (data) => /^[01]$/.test(data);
+const timeValidation = (data) => /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(data);
+
+const filterQueryValidation = (data) => {
+  const error = [];
+  if (!['color', 'price', 'capacity', 'stock', 'category', 'name'].includes(data.sort.toLowerCase())) {
+    error.push('Sort query invalid!');
+  }
+  if (!['asc', 'desc'].includes(data.order.toLowerCase())) {
+    error.push('Order query invalid!');
+  }
+  if (data.isAvailable.length > 0 && ![0, 1].includes(parseInt(data.isAvailable, 10))) {
+    error.push('Availability filter query invalid!');
+  }
+  if (data.hasPrepayment.length > 0 && ![0, 1].includes(parseInt(data.hasPrepayment, 10))) {
+    error.push('Prepayment filter query invalid!');
+  }
+
+  if (data.page !== undefined && !checkIntegerFormat(data.page)) {
+    error.push('Page query invalid!');
+  }
+  if (data.limit !== undefined && !checkIntegerFormat(data.limit)) {
+    error.push('Limit query invalid!');
+  }
+  return error;
+};
+
 const getVehicles = (req, res) => {
   let {
     search, sort, order, page, limit, isAvailable, hasPrepayment,
@@ -12,29 +41,21 @@ const getVehicles = (req, res) => {
   isAvailable = isAvailable || '';
   hasPrepayment = hasPrepayment || '';
 
-  if (!['color', 'price', 'capacity', 'stock', 'category'].includes(sort.toLowerCase())) {
-    sort = 'name';
-  }
-  if (order.toLowerCase() !== 'asc') {
-    order = 'desc';
-  }
-  if (![0, 1].includes(parseInt(isAvailable, 10))) {
-    isAvailable = '';
-  }
-  if (![0, 1].includes(parseInt(hasPrepayment, 10))) {
-    hasPrepayment = '';
+  const dataQuery = {
+    search, sort, order, page, limit, isAvailable, hasPrepayment,
+  };
+  const error = filterQueryValidation(dataQuery);
+
+  if (error.length > 0) {
+    return res.status(400).json({
+      success: false,
+      error,
+    });
   }
 
   search = search || '';
   page = parseInt(page, 10) || 1;
   limit = parseInt(limit, 10) || 5;
-
-  if (page < 1) {
-    page = 1;
-  }
-  if (limit < 1) {
-    limit = 5;
-  }
 
   const offset = (page - 1) * limit;
   const data = {
@@ -60,13 +81,13 @@ const getVehicles = (req, res) => {
             results,
           });
         }
-        return res.status(404).json({
+        return res.status(400).json({
           success: false,
           message: 'List not found',
         });
       });
     } else {
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
         message: 'List not found',
       });
@@ -101,17 +122,16 @@ const getPopularVehicles = (req, res) => {
   isAvailable = isAvailable || '';
   hasPrepayment = hasPrepayment || '';
 
-  if (!['color', 'price', 'capacity', 'stock', 'category'].includes(sort.toLowerCase())) {
-    sort = 'name';
-  }
-  if (order.toLowerCase() !== 'asc') {
-    order = 'desc';
-  }
-  if (![0, 1].includes(parseInt(isAvailable, 10))) {
-    isAvailable = '';
-  }
-  if (![0, 1].includes(parseInt(hasPrepayment, 10))) {
-    hasPrepayment = '';
+  const dataQuery = {
+    search, sort, order, page, limit, isAvailable, hasPrepayment,
+  };
+  const error = filterQueryValidation(dataQuery);
+
+  if (error.length > 0) {
+    return res.status(400).json({
+      success: false,
+      error,
+    });
   }
 
   search = search || '';
@@ -149,13 +169,13 @@ const getPopularVehicles = (req, res) => {
             results,
           });
         }
-        return res.status(404).json({
+        return res.status(400).json({
           success: false,
           message: 'List not found',
         });
       });
     } else {
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
         message: 'List not found',
       });
@@ -193,24 +213,19 @@ const getVehiclesFromCategory = (req, res) => {
             results,
           });
         }
-        return res.status(404).json({
+        return res.status(400).json({
           success: false,
           message: 'List not found',
         });
       });
     } else {
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
         message: 'List not found',
       });
     }
   });
 };
-
-const checkIntegerFormat = (data) => /^[1-9][0-9]*/.test(data); // check apakah data isinya hanya digit yang awalnya bukan 0
-const checkPriceFormat = (data) => /^[^-0+]\d+.\d{2}?$/.test(data) || /^0$/.test(data);
-const checkBoolean = (data) => /^[01]$/.test(data);
-const timeValidation = (data) => /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(data);
 
 const cekCategory = (categoryId) => new Promise((resolve, reject) => {
   categoryModel.getCategory(categoryId, (res) => {
