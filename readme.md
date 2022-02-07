@@ -5,6 +5,7 @@ A backend programm for vehicles rental application.
 
 ### Endpoints
 | **url** | **Method** | **Description** |
+| ------------- | ------------- | ------------- |
 | vehicle | GET | Get a list of vehicle data |
 | vehicle/:id | GET | Get a detailed vehicle data |
 | vehicle | POST | Insert a vehicle data |
