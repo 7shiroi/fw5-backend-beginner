@@ -92,7 +92,7 @@ function validateDataUser(data) {
   if (data.email === undefined || !emailValidation(data.email)) {
     error.push('Input parameter email salah!');
   }
-  if (data.password === undefined || passwordValidation(data.password)) {
+  if (data.password === undefined || !passwordValidation(data.password)) {
     error.push('Input parameter password salah!');
   }
   if (data.name === undefined || data.name.length === 0) {
