@@ -184,12 +184,31 @@ const addHistory = (req, res) => {
         const minPrepayment = dataVehicle.price * (20 / 100); // prepayment minimal 20% of vehicle price
         if (
           data.prepayment === undefined
-          || data.prepayment < minPrepayment
-          || data.prepayment > maxPrepayment
+            || data.prepayment < minPrepayment
         ) {
           return res.status(400).json({
             success: false,
-            error: `Input parameter Prepayment salah! Prepayment minimal = ${minPrepayment}, Prepayment maximal = ${maxPrepayment}`,
+            error: `Input parameter Prepayment salah! Prepayment minimal = ${minPrepayment}`,
+          });
+        }
+        if (
+          data.prepayment !== undefined
+            && data.prepayment > maxPrepayment
+        ) {
+          return res.status(400).json({
+            success: false,
+            error: `Input parameter Prepayment salah! Prepayment maximal = ${maxPrepayment}`,
+          });
+        }
+      } else {
+        const maxPrepayment = dataVehicle.price; // prepayment max = vehicle price
+        if (
+          data.prepayment !== undefined
+            && data.prepayment > maxPrepayment
+        ) {
+          return res.status(400).json({
+            success: false,
+            error: `Input parameter Prepayment salah! Prepayment maximal = ${maxPrepayment}`,
           });
         }
       }
@@ -242,11 +261,30 @@ const editHistory = (req, res) => {
         if (
           data.prepayment === undefined
             || data.prepayment < minPrepayment
-            || data.prepayment > maxPrepayment
         ) {
           return res.status(400).json({
             success: false,
-            error: `Input parameter Prepayment salah! Prepayment minimal = ${minPrepayment}, Prepayment maximal = ${maxPrepayment}`,
+            error: `Input parameter Prepayment salah! Prepayment minimal = ${minPrepayment}`,
+          });
+        }
+        if (
+          data.prepayment !== undefined
+            && data.prepayment > maxPrepayment
+        ) {
+          return res.status(400).json({
+            success: false,
+            error: `Input parameter Prepayment salah! Prepayment maximal = ${maxPrepayment}`,
+          });
+        }
+      } else {
+        const maxPrepayment = dataVehicle.price; // prepayment max = vehicle price
+        if (
+          data.prepayment !== undefined
+            && data.prepayment > maxPrepayment
+        ) {
+          return res.status(400).json({
+            success: false,
+            error: `Input parameter Prepayment salah! Prepayment maximal = ${maxPrepayment}`,
           });
         }
       }
