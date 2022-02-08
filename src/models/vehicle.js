@@ -22,6 +22,7 @@ exports.getVehicles = (data, cb) => {
     v.stock, 
     v.price, 
     v.capacity, 
+    v.image,
     v.is_available, 
     v.has_prepayment, 
     v.reservation_deadline 
@@ -81,6 +82,7 @@ exports.getPopularVehicles = (data, cb) => {
     v.stock, 
     v.price, 
     v.capacity, 
+    v.image,
     v.is_available, 
     v.has_prepayment, 
     v.reservation_deadline,
@@ -131,6 +133,7 @@ exports.getVehicle = (id, cb) => {
     v.stock, 
     v.price, 
     v.capacity, 
+    v.image,
     v.is_available, 
     v.has_prepayment, 
     v.reservation_deadline 

@@ -1,11 +1,13 @@
 /* eslint-disable consistent-return */
+const fs = require('fs');
 const vehicleModel = require('../models/vehicle');
 const categoryModel = require('../models/category');
+const uploadImage = require('../helpers/upload').single('image');
+const {
+  checkIntegerFormat, checkPriceFormat, checkBoolean, timeValidation, idValidator,
+} = require('../helpers/validator');
 
-const checkIntegerFormat = (data) => /^[1-9][0-9]*/.test(data); // check apakah data isinya hanya digit yang awalnya bukan 0
-const checkPriceFormat = (data) => /^[^-0+]\d+.\d{2}?$/.test(data) || /^0$/.test(data);
-const checkBoolean = (data) => /^[01]$/.test(data);
-const timeValidation = (data) => /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(data);
+const { APP_URL } = process.env;
 
 const filterQueryValidation = (data) => {
   const error = [];
@@ -241,7 +243,7 @@ const cekCategory = (categoryId) => new Promise((resolve, reject) => {
 // eslint-disable-next-line require-jsdoc
 function validateDataVehicle(data) {
   // expected data {name, id_category, color, location, stock, price, capacity, is_available(0,1),
-  // has_prepayment(0,1), reservation_deadline check string format (00.00)}
+  // has_prepayment(0,1), reservation_deadline check string format (00.00), image (nullable)}
   const error = [];
 
   if (data.name === undefined || data.name.length === 0) {
@@ -302,95 +304,150 @@ function validateDataVehicle(data) {
 }
 
 const addVehicle = (req, res) => {
-  const data = req.body;
-  const error = validateDataVehicle(data);
-  if (error.length > 0) {
-    return res.status(400).json({
-      success: false,
-      error,
-    });
-  }
+  uploadImage(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({
+        success: false,
+        message: err.message,
+      });
+    }
+    const data = req.body;
+    const error = validateDataVehicle(data);
 
-  cekCategory(data.id_category).then(() => {
-    vehicleModel.checkVehicle(data, (result) => {
-      if (result[0].checkCount > 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'Data sudah ada!',
+    if (error.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error,
+      });
+    }
+    if (req.file) {
+      data.image = req.file.path;
+    }
+
+    cekCategory(data.id_category).then(() => {
+      vehicleModel.checkVehicle(data, (result) => {
+        if (result[0].checkCount > 0) {
+          return res.status(400).json({
+            success: false,
+            error: 'Data sudah ada!',
+          });
+        }
+
+        vehicleModel.addVehicle(data, (results) => {
+          vehicleModel.getVehicle(results.insertId, (insertedData) => {
+            const mapResults = insertedData.map((o) => {
+              if (o.image !== null) {
+                // eslint-disable-next-line no-param-reassign
+                o.image = `${APP_URL}/${o.image}`;
+              }
+              return o;
+            });
+
+            return res.json({
+              success: true,
+              message: `${results.affectedRows} vehicle added`,
+              results: mapResults,
+            });
+          });
         });
-      }
-      data.id_category = parseInt(data.id_category, 10);
-      data.stock = parseInt(data.stock, 10);
-      data.price = parseFloat(data.price, 10);
-      data.is_available = parseInt(data.is_available, 10);
-      data.has_prepayment = parseInt(data.has_prepayment, 10);
-      vehicleModel.addVehicle(data, (results) => res.json({
-        success: true,
-        message: `${results.affectedRows} vehicle added`,
-        results: data,
-      }));
-    });
-  }).catch((errMsg) => res.status(400).json({
-    success: false,
-    error: errMsg,
-  }));
+      });
+    }).catch((errMsg) => res.status(400).json({
+      success: false,
+      error: errMsg,
+    }));
+  });
 };
 
 const editVehicle = (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
-  data.id = parseInt(id, 10);
-  //   expected body {name, type, merk, stock, price}
-  const error = validateDataVehicle(data);
-  if (error.length > 0) {
-    return res.status(400).json({
-      success: false,
-      error,
-    });
-  }
+  uploadImage(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({
+        success: false,
+        message: err.message,
+      });
+    }
+    const { id } = req.params;
+    const data = req.body;
+    data.id = parseInt(id, 10);
+    //   expected body {name, type, merk, stock, price}
+    const error = validateDataVehicle(data);
+    if (error.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error,
+      });
+    }
 
-  cekCategory(data.id_category).then(() => {
-    vehicleModel.checkVehicle(data, (result) => {
-      if (result[0].checkCount > 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'Data sudah ada!',
-        });
-      }
+    if (req.file) {
+      data.image = req.file.path;
+    }
 
-      vehicleModel.getVehicle(id, (results) => {
-        if (results.length > 0) {
-          data.id_category = parseInt(data.id_category, 10);
-          data.stock = parseInt(data.stock, 10);
-          data.price = parseFloat(data.price, 10);
-          data.is_available = parseInt(data.is_available, 10);
-          data.has_prepayment = parseInt(data.has_prepayment, 10);
-          vehicleModel.editVehicle(id, data, () => res.json({
-            success: true,
-            message: `Vehicle with id ${id} has been updated`,
-            results: data,
-          }));
-        } else {
-          return res.status(404).json({
+    cekCategory(data.id_category).then(() => {
+      vehicleModel.checkVehicle(data, (result) => {
+        if (result[0].checkCount > 0) {
+          return res.status(400).json({
             success: false,
-            message: 'Vehicle not found',
+            error: 'Data sudah ada!',
           });
         }
+
+        vehicleModel.getVehicle(id, (results) => {
+          if (results.length > 0) {
+            if (data.image && results[0].image) {
+              fs.rm(results[0].image, {}, (errMsg) => {
+                if (errMsg) {
+                  return res.status(500).json({
+                    success: false,
+                    message: 'File not found',
+                  });
+                }
+              });
+            }
+            vehicleModel.editVehicle(id, data, () => {
+              vehicleModel.getVehicle(id, (insertedData) => {
+                const mapResults = insertedData.map((o) => {
+                  if (o.image !== null) {
+                    // eslint-disable-next-line no-param-reassign
+                    o.image = `${APP_URL}/${o.image}`;
+                  }
+                  return o;
+                });
+
+                return res.json({
+                  success: true,
+                  message: `Vehicle id ${id} has been edited`,
+                  results: mapResults,
+                });
+              });
+            });
+          } else {
+            return res.status(404).json({
+              success: false,
+              message: 'Vehicle not found',
+            });
+          }
+        });
       });
-    });
-  }).catch((errMsg) => res.status(400).json({
-    success: false,
-    error: errMsg,
-  }));
+    }).catch((errMsg) => res.status(400).json({
+      success: false,
+      error: errMsg,
+    }));
+  });
 };
 
 const deleteVehicle = (req, res) => {
+  if (idValidator(req.params)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid id format',
+    });
+  }
   const { id } = req.params;
 
   vehicleModel.getVehicle(id, (results) => {
     if (results.length > 0) {
       vehicleModel.deleteVehicle(id, () => res.json({
-        succes: true,
+        success: true,
         message: `Vehicle with id ${id} has been deleted`,
         data: results,
       }));
