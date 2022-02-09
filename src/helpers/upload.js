@@ -12,13 +12,14 @@ const storage = multer.diskStorage({
 });
 
 function imageFileFilter(req, file, cb) {
-  if (file.mimetype !== 'image/jpeg' || file.mimetype !== 'image/png') {
+  const supportedMimeType = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/tiff'];
+  if (!supportedMimeType.includes(file.mimetype)) {
     cb(new Error('Filetype mismatch!'), false);
   } else {
     cb(null, true);
   }
 }
 
-const uploadImage = multer({ storage, imageFileFilter });
+const uploadImage = multer({ storage, fileFilter: imageFileFilter });
 
 module.exports = uploadImage;

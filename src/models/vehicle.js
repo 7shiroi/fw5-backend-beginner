@@ -271,7 +271,7 @@ exports.getVehicle = (id, cb) => {
   });
 };
 
-exports.getVehicle = (id) => new Promise((resolve, reject) => {
+exports.getVehicleAsync = (id) => new Promise((resolve, reject) => {
   db.query(`SELECT 
     v.id, 
     v.name, 
@@ -406,7 +406,7 @@ exports.editVehicle = (id, data, cb) => {
   );
 };
 
-exports.editVehicle = (id, data) => new Promise((resolve, reject) => {
+exports.editVehicleAsync = (id, data) => new Promise((resolve, reject) => {
   db.query(
     'UPDATE vehicles SET ? WHERE id = ?',
     [data, id],
