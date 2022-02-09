@@ -10,6 +10,7 @@ const {
   idValidator,
   // vehicleCategoryValidation,
 } = require('../helpers/validator');
+const responseHandler = require('../helpers/responseHandler');
 
 const { APP_URL } = process.env;
 
@@ -233,17 +234,6 @@ const getVehiclesFromCategory = (req, res) => {
   });
 };
 
-// const cekCategory = (categoryId) => new Promise((resolve, reject) => {
-//   categoryModel.getCategory(categoryId, (res) => {
-//     if (res.length > 0) {
-//       resolve();
-//     } else {
-//       // eslint-disable-next-line prefer-promise-reject-errors
-//       reject('Kategori tidak ditemukan');
-//     }
-//   });
-// });
-
 // eslint-disable-next-line require-jsdoc
 function validateDataVehicle(data) {
   // expected data {name, id_category, color, location, stock, price, capacity, is_available(0,1),
@@ -326,16 +316,10 @@ const addVehicle = async (req, res) => {
         try {
           deleteFile(req.file.path);
         } catch (err) {
-          return res.status(500).json({
-            success: false,
-            err: err.message,
-          });
+          return responseHandler(res, 500, null, null, err.message);
         }
       }
-      return res.status(400).json({
-        success: false,
-        error,
-      });
+      return responseHandler(res, 400, null, null, error);
     }
     if (req.file) {
       data.image = req.file.path;
@@ -349,16 +333,10 @@ const addVehicle = async (req, res) => {
           try {
             deleteFile(req.file.path);
           } catch (err) {
-            return res.status(500).json({
-              success: false,
-              err,
-            });
+            return responseHandler(res, 500, null, null, err.message);
           }
         }
-        return res.status(400).json({
-          success: false,
-          error: 'Data sudah ada!',
-        });
+        return responseHandler(res, 400, null, null, 'Vehicle already existed');
       }
       const addVehicleData = await vehicleModel.addVehicleAsync(data);
       const insertedData = await vehicleModel.getVehicleAsync(addVehicleData.insertId);
@@ -369,41 +347,25 @@ const addVehicle = async (req, res) => {
         }
         return o;
       });
-      return res.json({
-        success: true,
-        message: `${addVehicleData.affectedRows} vehicle added`,
-        results: mapResults,
-      });
+      return responseHandler(res, 201, `${addVehicleData.affectedRows} vehicle added`, mapResults);
     }
     if (req.file) {
       try {
         deleteFile(req.file.path);
       } catch (err) {
-        return res.status(500).json({
-          success: false,
-          err,
-        });
+        return responseHandler(res, 500, null, null, err.message);
       }
     }
-    return res.status(400).json({
-      success: false,
-      error: `Category with id ${data.id_category} not found`,
-    });
+    return responseHandler(res, 400, null, null, `Category with id ${data.id_category} not found`);
   } catch (error) {
     if (req.file) {
       try {
         deleteFile(req.file.path);
       } catch (err) {
-        return res.status(500).json({
-          success: false,
-          err,
-        });
+        return responseHandler(res, 500, null, null, err.message);
       }
     }
-    return res.status(500).json({
-      success: false,
-      error,
-    });
+    return responseHandler(res, 500, null, null, error);
   }
 };
 
@@ -413,10 +375,7 @@ const editVehicle = async (req, res) => {
     const data = req.body;
     data.id = parseInt(id, 10);
     if (idValidator(req.params.id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid id format',
-      });
+      return responseHandler(res, 400, null, null, 'Invalid id format');
     }
     const error = validateDataVehicle(data);
     if (error.length > 0) {
@@ -424,16 +383,10 @@ const editVehicle = async (req, res) => {
         try {
           deleteFile(req.file.path);
         } catch (err) {
-          return res.status(500).json({
-            success: false,
-            err: err.message,
-          });
+          return responseHandler(res, 500, null, null, err.message);
         }
       }
-      return res.status(400).json({
-        success: false,
-        error,
-      });
+      return responseHandler(res, 500, null, null, error);
     }
     if (req.file) {
       data.image = req.file.path;
@@ -447,10 +400,7 @@ const editVehicle = async (req, res) => {
           try {
             deleteFile(req.file.path);
           } catch (err) {
-            return res.status(500).json({
-              success: false,
-              err: err.message,
-            });
+            return responseHandler(res, 500, null, null, err.message);
           }
         }
         return res.status(400).json({
@@ -463,24 +413,15 @@ const editVehicle = async (req, res) => {
         try {
           deleteFile(req.file.path);
         } catch (err) {
-          return res.status(500).json({
-            success: false,
-            err: err.message,
-          });
+          return responseHandler(res, 500, null, null, err.message);
         }
-        return res.status(400).json({
-          success: false,
-          message: 'Vehicle not found',
-        });
+        return responseHandler(res, 400, null, null, 'Vehicle not found');
       }
       if (data.image && originalData[0].image) {
         try {
           deleteFile(originalData[0].image);
         } catch (err) {
-          return res.status(500).json({
-            success: false,
-            err: err.message,
-          });
+          return responseHandler(res, 500, null, null, err.message);
         }
       }
       await vehicleModel.editVehicleAsync(id, data);
@@ -492,72 +433,45 @@ const editVehicle = async (req, res) => {
         }
         return o;
       });
-      return res.json({
-        success: true,
-        message: `Vehicle id ${id} has been edited`,
-        results: mapResults,
-      });
+      return responseHandler(res, 200, `Vehicle id ${id} has been edited`, mapResults);
     }
   } catch (error) {
     if (req.file) {
       try {
         deleteFile(req.file.path);
       } catch (err) {
-        return res.status(500).json({
-          success: false,
-          err,
-        });
+        return responseHandler(res, 500, null, null, err.message);
       }
     }
-    return res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+    return responseHandler(res, 500, null, null, error);
   }
 };
 
 const deleteVehicle = async (req, res) => {
   try {
     if (idValidator(req.params.id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid id format',
-      });
+      return responseHandler(res, 400, null, null, 'Invalid id format');
     }
     const { id } = req.params;
 
     const results = await vehicleModel.getVehicleAsync(id);
     if (results.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Vehicle not found',
-      });
+      return responseHandler(res, 400, null, null, 'Vehicle not found');
     }
 
     if (results[0].image) {
       try {
         deleteFile(results[0].image);
       } catch (err) {
-        return res.status(500).json({
-          success: false,
-          err: err.message,
-        });
+        return responseHandler(res, 500, null, null, err.message);
       }
     }
-
     const deleteVehicleData = await vehicleModel.deleteVehicleAsync(id);
     if (deleteVehicleData.affectedRows > 0) {
-      return res.json({
-        success: true,
-        message: `Vehicle with id ${id} has been deleted`,
-        data: results,
-      });
+      return responseHandler(res, 200, `Vehicle with id ${id} has been deleted`, results);
     }
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+    return responseHandler(res, 500, null, null, error);
   }
 };
 
