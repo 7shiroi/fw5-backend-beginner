@@ -1,92 +1,82 @@
 /* eslint-disable consistent-return */
+const argon2 = require('argon2');
 const userModel = require('../models/user');
+const roleModel = require('../models/role');
+const {
+  idValidator, emailValidation, passwordValidation, phoneNumberValidation, dateValidation,
+} = require('../helpers/validator');
+const responseHandler = require('../helpers/responseHandler');
 
-const getUsers = (req, res) => {
-  let { email, page, limit } = req.query;
-  email = email || '';
-  page = page || 1;
-  limit = limit || 5;
-  const offset = (page - 1) * limit;
-  const data = { email, limit, offset };
+const getUsers = async (req, res) => {
+  try {
+    let { email, page, limit } = req.query;
+    email = email || '';
+    page = page || 1;
+    limit = limit || 5;
+    const offset = (page - 1) * limit;
+    const data = { email, limit, offset };
 
-  userModel.getUsersCount(data, (count) => {
+    const count = await userModel.getUsersCountAsync(data);
     const { rowsCount } = count[0];
     if (rowsCount > 0) {
       const lastPage = Math.ceil(rowsCount / limit);
 
-      userModel.getUsers(data, (results) => {
-        if (results.length > 0) {
-          return res.json({
-            success: true,
-            message: 'List Users',
-            pageInfo: {
-              prev: page > 1 ? `http://localhost:5000/user?email=${email}&page=${page - 1}&limit=${limit}` : null,
-              next: page < lastPage ? `http://localhost:5000/user?email=${email}&page=${page + 1}&limit=${limit}` : null,
-              totalData: rowsCount,
-              currentPage: page,
-              lastPage,
-            },
-            results,
-          });
-        }
-        return res.status(404).json({
-          success: false,
-          message: 'List not found',
-        });
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: 'List not found',
-      });
+      const results = await userModel.getUsersAsync(data);
+      if (results.length > 0) {
+        const pageInfo = {
+          prev: page > 1 ? `http://localhost:5000/user?email=${email}&page=${page - 1}&limit=${limit}` : null,
+          next: page < lastPage ? `http://localhost:5000/user?email=${email}&page=${page + 1}&limit=${limit}` : null,
+          totalData: rowsCount,
+          currentPage: page,
+          lastPage,
+        };
+        return responseHandler(res, 200, 'List Users', results, null, pageInfo);
+      }
+      return responseHandler(res, 400, 'List not found', results);
     }
-  });
+    return responseHandler(res, 400, 'List not found');
+  } catch (error) {
+    return responseHandler(res, 500, null, null, 'Unexpected Error!');
+  }
 };
 
-const getUser = (req, res) => {
-  const { id } = req.params;
-  userModel.getUser(id, (results) => {
+const getUser = async (req, res) => {
+  try {
+    if (!idValidator(req.params.id)) {
+      return responseHandler(res, 400, null, null, 'Invalid id format');
+    }
+    const { id } = req.params;
+    const results = await userModel.getUserAsync(id);
     if (results.length > 0) {
-      return res.json({
-        success: true,
-        message: 'Detail User',
-        results: results[0],
-      });
+      return responseHandler(res, 200, 'Detail user', results[0]);
     }
-    return res.status(404).json({
-      success: false,
-      message: 'User not found',
-    });
-  });
+    return responseHandler(res, 404, 'User not found');
+  } catch (error) {
+    return responseHandler(res, 500, null, null, 'Unexpected Error!');
+  }
 };
 
-const getProfile = (req, res) => {
-  let { id } = req.params;
-  id = id || 0;
-  userModel.getProfile(id, (results) => {
+const getProfile = async (req, res) => {
+  try {
+    if (!idValidator(req.params.id)) {
+      return responseHandler(res, 400, null, null, 'Invalid id format');
+    }
+    let { id } = req.params;
+    id = id || 0;
+    const results = await userModel.getProfileAsync(id);
     if (results.length > 0) {
-      return res.json({
-        success: true,
-        message: 'User Profile',
-        results: results[0],
-      });
+      return responseHandler(res, 200, 'User Profile', results[0]);
     }
-    return res.status(404).json({
-      success: false,
-      message: 'User not found',
-    });
-  });
+    return responseHandler(res, 404, 'User not found');
+  } catch (error) {
+    return responseHandler(res, 500, null, null, 'Unexpected Error!');
+  }
 };
-
-const checkPhoneNumber = (data) => /^[+0]\d+$/.test(data);
-const dateValidation = (data) => /^[^0]\d{3}-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$/.test(data);
-const emailValidation = (data) => /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(data);
-const passwordValidation = (data) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,20})/.test(data);
 
 // eslint-disable-next-line require-jsdoc
 function validateDataUser(data) {
   // expected data {email, password, name, phone_number, address,
-  // display_name, gender, birth_date, picture(nullable)}
+  // username, gender, birth_date, picture(nullable)}
   const error = [];
 
   if (data.email === undefined || !emailValidation(data.email)) {
@@ -100,7 +90,7 @@ function validateDataUser(data) {
   }
   if (
     data.phone_number === undefined
-    || !checkPhoneNumber(data.phone_number)
+    || !phoneNumberValidation(data.phone_number)
     || data.phone_number.length < 6
     || data.phone_number.length > 16
   ) {
@@ -112,12 +102,12 @@ function validateDataUser(data) {
     error.push('Input parameter alamat salah!');
   }
   if (
-    data.display_name === undefined
-    || data.display_name.length === 0
+    data.username === undefined
+    || data.username.length === 0
   ) {
     error.push('Input parameter display name salah!');
   }
-  if (data.display_name.length > 32) {
+  if (data.username.length > 32) {
     error.push('Display name terlalu panjang');
   }
   if (
@@ -135,85 +125,110 @@ function validateDataUser(data) {
   return error;
 }
 
-const addUser = (req, res) => {
-  const data = req.body;
-  const error = validateDataUser(data);
-  if (error.length > 0) {
-    return res.status(400).json({
-      success: false,
-      error,
-    });
-  }
+const addUser = async (req, res) => {
+  try {
+    if (!req.user || req.user.role > 2) {
+      return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
+    }
+    const data = req.body;
+    const error = validateDataUser(data);
+    if (error.length > 0) {
+      return responseHandler(res, 400, null, null, error);
+    }
 
-  userModel.checkIfEmailUsed(data, (emailFound) => {
+    const emailFound = await userModel.checkIfEmailUsedAsync(data);
     if (emailFound[0].rowsCount) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email is already used',
-      });
+      return responseHandler(res, 400, null, null, 'Email has already been used');
+    }
+    const usernameFound = await userModel.checkIfUsernameUsedAsync(data);
+    if (usernameFound[0].rowsCount) {
+      return responseHandler(res, 400, null, null, 'Username has already been used');
+    }
+    const roleFound = await roleModel.getRoleAsync(data.id_role);
+    if (roleFound.length === 0) {
+      return responseHandler(res, 400, null, null, 'User role not found');
     }
 
-    userModel.addUser(data, (result) => res.json({
-      success: true,
-      message: `${result.affectedRows} user added`,
-      results: data,
-    }));
-  });
-};
+    try {
+      data.password = await argon2.hash(data.password);
+    } catch (err) {
+      return responseHandler(res, 500, null, null, 'Unexpected error');
+    }
 
-const editUser = (req, res) => {
-  const data = req.body;
-  data.id = req.params.id || 0;
-  const error = validateDataUser(data);
-  if (error.length > 0) {
-    return res.status(400).json({
-      success: false,
-      error,
-    });
+    const result = await userModel.addUserAsync(data);
+    return responseHandler(res, 200, `${result.affectedRows} user added`, data);
+  } catch (error) {
+    return responseHandler(res, 500, null, null, 'Unexpected Error');
   }
-
-  userModel.getUser(data.id, (results) => {
-    if (results.length > 0) {
-      userModel.checkIfEmailUsed(data, (emailFound) => {
-        if (emailFound[0].rowsCount) {
-          return res.status(400).json({
-            success: false,
-            error: 'Email is already used',
-          });
-        }
-        userModel.editUser(data.id, data, () => res.json({
-          success: true,
-          message: `User with id ${data.id} has been updated`,
-          results: data,
-        }));
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
-    }
-  });
 };
 
-const deleteUser = (req, res) => {
-  let { id } = req.params;
-  id = id || 0;
-
-  userModel.getUser(id, (results) => {
-    if (results.length > 0) {
-      userModel.deleteUser(id, () => res.json({
-        success: true,
-        message: `User with id ${id} has been deleted`,
-        data: results,
-      }));
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
+const editUser = async (req, res) => {
+  try {
+    if (!req.user || req.user.role > 2) {
+      return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
     }
-  });
+    if (!idValidator(req.params.id)) {
+      return responseHandler(res, 400, null, null, 'Invalid id format');
+    }
+    const data = req.body;
+    data.id = req.params.id || 0;
+    const error = validateDataUser(data);
+    if (error.length > 0) {
+      return responseHandler(res, 400, null, null, error);
+    }
+
+    const results = await userModel.getUserAsync(data.id);
+    if (results.length > 0) {
+      const emailFound = await userModel.checkIfEmailUsedAsync(data);
+      if (emailFound[0].rowsCount) {
+        return responseHandler(res, 400, null, null, 'Email has already been used');
+      }
+      const usernameFound = await userModel.checkIfUsernameUsedAsync(data);
+      if (usernameFound[0].rowsCount) {
+        return responseHandler(res, 400, null, null, 'Username has already been used');
+      }
+      const roleFound = await roleModel.getRoleAsync(data.id_role);
+      if (roleFound.length === 0) {
+        return responseHandler(res, 400, null, null, 'User role not found');
+      }
+
+      try {
+        await userModel.editUserAsync(data.id, data, () => responseHandler(res, 200, `User with id ${data.id} has been updated`, data));
+      } catch (err) {
+        return responseHandler(res, 500, null, null, 'Unexpected Error');
+      }
+    } else {
+      return responseHandler(res, 400, null, null, 'User not found');
+    }
+  } catch (error) {
+    return responseHandler(res, 500, null, null, 'Unexpected Error');
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    if (!req.user || req.user.role > 2) {
+      return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
+    }
+    if (!idValidator(req.params)) {
+      return responseHandler(res, 400, null, null, 'Invalid id format');
+    }
+    const { id } = req.params;
+
+    const results = await userModel.getUserAsync(id);
+    if (results.length > 0) {
+      try {
+        await userModel.deleteUserAsync(id);
+        return responseHandler(res, 200, `User with id ${id} has been deleted`);
+      } catch (error) {
+        return responseHandler(res, 500, null, null, 'Unexpected Error');
+      }
+    } else {
+      return responseHandler(res, 404, 'User not found');
+    }
+  } catch (error) {
+    return responseHandler(res, 500, null, null, 'Unexpected Error');
+  }
 };
 
 module.exports = {

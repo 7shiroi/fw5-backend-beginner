@@ -9,13 +9,14 @@ const {
   getVehiclesFromCategory,
 } = require('../controllers/vehicle');
 const uploadImage = require('../helpers/upload');
+const { verifyUser } = require('../helpers/auth');
 
 vehicle.get('/', getVehicles);
-vehicle.post('/', uploadImage.single('image'), addVehicle);
+vehicle.post('/', verifyUser, uploadImage.single('image'), addVehicle);
 vehicle.get('/popular', getPopularVehicles);
 vehicle.get('/category/:id', getVehiclesFromCategory);
 vehicle.get('/:id', getVehicle);
-vehicle.patch('/:id', uploadImage.single('image'), editVehicle);
-vehicle.delete('/:id', deleteVehicle);
+vehicle.patch('/:id', verifyUser, uploadImage.single('image'), editVehicle);
+vehicle.delete('/:id', verifyUser, deleteVehicle);
 
 module.exports = vehicle;

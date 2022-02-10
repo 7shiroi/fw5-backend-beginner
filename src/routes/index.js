@@ -6,6 +6,7 @@ route.use('/category', require('./category'));
 route.use('/vehicle', require('./vehicle'));
 route.use('/user', require('./user'));
 route.use('/history', require('./history'));
+route.use('/auth', require('./auth'));
 
 route.get('/popular', getPopularVehicles);
 route.get('/profile/:id', getProfile);

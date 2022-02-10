@@ -9,7 +9,7 @@ const emailValidation = (data) => /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@
 const passwordValidation = (data) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,20})/.test(data);
 
 const idValidator = (id) => {
-  if (Number.isNaN(Number(id))) {
+  if (checkIntegerFormat(id)) {
     return true;
   }
   return false;

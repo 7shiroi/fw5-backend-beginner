@@ -274,6 +274,9 @@ const deleteFile = (filePath) => {
 
 const addVehicle = async (req, res) => {
   try {
+    if (!req.user || req.user.role > 2) {
+      return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
+    }
     const data = req.body;
     const error = validateDataVehicle(data);
     // const vehicleCategoryCheck = await vehicleCategoryValidation(req.body.id_category);
@@ -338,12 +341,15 @@ const addVehicle = async (req, res) => {
 
 const editVehicle = async (req, res) => {
   try {
-    const { id } = req.params;
-    const data = req.body;
-    data.id = parseInt(id, 10);
+    if (!req.user || req.user.role > 2) {
+      return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
+    }
     if (idValidator(req.params.id)) {
       return responseHandler(res, 400, null, null, 'Invalid id format');
     }
+    const { id } = req.params;
+    const data = req.body;
+    data.id = parseInt(id, 10);
     const error = validateDataVehicle(data);
     if (error.length > 0) {
       if (req.file) {
@@ -416,6 +422,9 @@ const editVehicle = async (req, res) => {
 
 const deleteVehicle = async (req, res) => {
   try {
+    if (!req.user || req.user.role > 2) {
+      return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
+    }
     if (idValidator(req.params.id)) {
       return responseHandler(res, 400, null, null, 'Invalid id format');
     }

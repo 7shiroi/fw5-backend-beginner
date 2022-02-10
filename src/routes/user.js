@@ -1,4 +1,5 @@
 const user = require('express').Router();
+const { verifyUser } = require('../helpers/auth');
 
 const {
   getUsers,
@@ -10,8 +11,8 @@ const {
 
 user.get('/', getUsers);
 user.get('/:id', getUser);
-user.post('/', addUser);
-user.patch('/:id', editUser);
-user.delete('/:id', deleteUser);
+user.post('/', verifyUser, addUser);
+user.patch('/:id', verifyUser, editUser);
+user.delete('/:id', verifyUser, deleteUser);
 
 module.exports = user;
