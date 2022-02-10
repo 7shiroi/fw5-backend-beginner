@@ -38,200 +38,167 @@ const filterQueryValidation = (data) => {
   return error;
 };
 
-const getVehicles = (req, res) => {
-  let {
-    search, sort, order, page, limit, isAvailable, hasPrepayment,
-  } = req.query;
+const getVehicles = async (req, res) => {
+  try {
+    let {
+      search, sort, order, page, limit, isAvailable, hasPrepayment,
+    } = req.query;
 
-  sort = sort || 'name';
-  order = order || 'asc';
-  isAvailable = isAvailable || '';
-  hasPrepayment = hasPrepayment || '';
+    sort = sort || 'name';
+    order = order || 'asc';
+    isAvailable = isAvailable || '';
+    hasPrepayment = hasPrepayment || '';
 
-  const dataQuery = {
-    search, sort, order, page, limit, isAvailable, hasPrepayment,
-  };
-  const error = filterQueryValidation(dataQuery);
+    const dataQuery = {
+      search, sort, order, page, limit, isAvailable, hasPrepayment,
+    };
+    const error = filterQueryValidation(dataQuery);
 
-  if (error.length > 0) {
-    return res.status(400).json({
-      success: false,
-      error,
-    });
-  }
+    if (error.length > 0) {
+      return responseHandler(res, 400, null, null, error);
+    }
 
-  search = search || '';
-  page = parseInt(page, 10) || 1;
-  limit = parseInt(limit, 10) || 5;
+    search = search || '';
+    page = parseInt(page, 10) || 1;
+    limit = parseInt(limit, 10) || 5;
 
-  const offset = (page - 1) * limit;
-  const data = {
-    search, sort, order, isAvailable, hasPrepayment, offset, limit,
-  };
-  vehicleModel.getVehicleCount(data, (count) => {
-    const { rowsCount } = count[0];
+    const offset = (page - 1) * limit;
+    const data = {
+      search, sort, order, isAvailable, hasPrepayment, offset, limit,
+    };
+    const vehicleCount = await vehicleModel.getVehicleCountAsync(data);
+    const { rowsCount } = vehicleCount[0];
     if (rowsCount > 0) {
       const lastPage = Math.ceil(rowsCount / limit);
 
-      vehicleModel.getVehicles(data, (results) => {
-        if (results.length > 0) {
-          return res.json({
-            success: true,
-            message: 'List Vehicles',
-            pageInfo: {
-              prev: page > 1 ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page - 1}&limit=${limit}` : null,
-              next: page < lastPage ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page + 1}&limit=${limit}` : null,
-              totalData: rowsCount,
-              currentPage: page,
-              lastPage,
-            },
-            results,
-          });
-        }
-        return res.status(400).json({
-          success: false,
-          message: 'List not found',
-        });
-      });
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'List not found',
-      });
+      const results = await vehicleModel.getVehiclesAsync(data);
+      if (results.length > 0) {
+        const pageInfo = {
+          prev: page > 1 ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page - 1}&limit=${limit}` : null,
+          next: page < lastPage ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page + 1}&limit=${limit}` : null,
+          totalData: rowsCount,
+          currentPage: page,
+          lastPage,
+        };
+        return responseHandler(res, 200, 'List Vehicles', results, null, pageInfo);
+      }
+      return responseHandler(res, 400, 'List not found', results);
     }
-  });
+    return responseHandler(res, 400, 'List not found');
+  } catch (error) {
+    return responseHandler(res, 500, null, null, 'Unexpected Error');
+  }
 };
 
-const getVehicle = (req, res) => {
-  const { id } = req.params;
-  vehicleModel.getVehicle(id, (results) => {
+const getVehicle = async (req, res) => {
+  try {
+    if (idValidator(req.params.id)) {
+      return responseHandler(res, 400, null, null, 'Invalid id format');
+    }
+    const { id } = req.params;
+    const results = await vehicleModel.getVehicle(id);
     if (results.length > 0) {
-      return res.json({
-        success: true,
-        message: 'Detail Vehicle',
-        results: results[0],
-      });
+      return responseHandler(res, 200, 'Detail Vehicle', results[0]);
     }
-    return res.status(404).json({
-      success: false,
-      message: 'Vehicle not found',
-    });
-  });
+    return responseHandler(res, 404, 'Vehicle not found');
+  } catch (error) {
+    return responseHandler(res, 500, null, null, 'Unexpected Error');
+  }
 };
 
-const getPopularVehicles = (req, res) => {
-  let {
-    search, sort, order, page, limit, isAvailable, hasPrepayment,
-  } = req.query;
+const getPopularVehicles = async (req, res) => {
+  try {
+    let {
+      search, sort, order, page, limit, isAvailable, hasPrepayment,
+    } = req.query;
 
-  sort = sort || 'name';
-  order = order || 'asc';
-  isAvailable = isAvailable || '';
-  hasPrepayment = hasPrepayment || '';
+    sort = sort || 'name';
+    order = order || 'asc';
+    isAvailable = isAvailable || '';
+    hasPrepayment = hasPrepayment || '';
 
-  const dataQuery = {
-    search, sort, order, page, limit, isAvailable, hasPrepayment,
-  };
-  const error = filterQueryValidation(dataQuery);
+    const dataQuery = {
+      search, sort, order, page, limit, isAvailable, hasPrepayment,
+    };
+    const error = filterQueryValidation(dataQuery);
 
-  if (error.length > 0) {
-    return res.status(400).json({
-      success: false,
-      error,
-    });
-  }
+    if (error.length > 0) {
+      return responseHandler(res, 400, null, null, error);
+    }
 
-  search = search || '';
-  page = parseInt(page, 10) || 1;
-  limit = parseInt(limit, 10) || 5;
+    search = search || '';
+    page = parseInt(page, 10) || 1;
+    limit = parseInt(limit, 10) || 5;
 
-  if (page < 1) {
-    page = 1;
-  }
-  if (limit < 1) {
-    limit = 5;
-  }
+    if (page < 1) {
+      page = 1;
+    }
+    if (limit < 1) {
+      limit = 5;
+    }
 
-  const offset = (page - 1) * limit;
-  const data = {
-    search, sort, order, isAvailable, hasPrepayment, offset, limit,
-  };
-  vehicleModel.getPopularVehiclesCount(data, (count) => {
+    const offset = (page - 1) * limit;
+    const data = {
+      search, sort, order, isAvailable, hasPrepayment, offset, limit,
+    };
+
+    const count = await vehicleModel.getPopularVehiclesCountAsync(data);
     const { rowsCount } = count[0];
     if (rowsCount > 0) {
       const lastPage = Math.ceil(rowsCount / limit);
 
-      vehicleModel.getPopularVehicles(data, (results) => {
-        if (results.length > 0) {
-          return res.json({
-            success: true,
-            message: 'List Vehicles',
-            pageInfo: {
-              prev: page > 1 ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page - 1}&limit=${limit}` : null,
-              next: page < lastPage ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page + 1}&limit=${limit}` : null,
-              totalData: rowsCount,
-              currentPage: page,
-              lastPage,
-            },
-            results,
-          });
-        }
-        return res.status(400).json({
-          success: false,
-          message: 'List not found',
-        });
-      });
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'List not found',
-      });
+      const results = await vehicleModel.getPopularVehicles(data);
+      if (results.length > 0) {
+        const pageInfo = {
+          prev: page > 1 ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page - 1}&limit=${limit}` : null,
+          next: page < lastPage ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page + 1}&limit=${limit}` : null,
+          totalData: rowsCount,
+          currentPage: page,
+          lastPage,
+        };
+        return responseHandler(res, 200, 'List Popular Vehicles', results, null, pageInfo);
+      }
+      return responseHandler(res, 400, 'List not found', results);
     }
-  });
+    return responseHandler(res, 400, 'List not found');
+  } catch (error) {
+    return responseHandler(res, 500, null, null, 'Unexpected Error');
+  }
 };
 
-const getVehiclesFromCategory = (req, res) => {
-  let { page, limit } = req.query;
-  // eslint-disable-next-line camelcase
-  const { id } = req.params;
-  page = parseInt(page, 10) || 1;
-  limit = parseInt(limit, 10) || 5;
-  const offset = (page - 1) * limit;
-  // eslint-disable-next-line camelcase
-  const data = { offset, limit };
-  data.id_category = id;
-  vehicleModel.getVehiclesFromCategoryCount(data, (count) => {
+const getVehiclesFromCategory = async (req, res) => {
+  try {
+    let { page, limit } = req.query;
+    // eslint-disable-next-line camelcase
+    const { id } = req.params;
+    page = parseInt(page, 10) || 1;
+    limit = parseInt(limit, 10) || 5;
+    const offset = (page - 1) * limit;
+    // eslint-disable-next-line camelcase
+    const data = { offset, limit };
+    data.id_category = id;
+    const count = vehicleModel.getVehiclesFromCategoryCount(data);
     const { rowsCount } = count[0];
     if (rowsCount > 0) {
       const lastPage = Math.ceil(rowsCount / limit);
 
-      vehicleModel.getVehiclesFromCategory(data, (results) => {
-        if (results.length > 0) {
-          return res.json({
-            success: true,
-            message: 'List Vehicles',
-            pageInfo: {
-              prev: page > 1 ? `http://localhost:5000/vehicle/category/${data.id_category}?page=${page - 1}&limit=${limit}` : null,
-              next: page < lastPage ? `http://localhost:5000/vehicle/category/${data.id_category}?page=${page + 1}&limit=${limit}` : null,
-              totalData: rowsCount,
-              currentPage: page,
-              lastPage,
-            },
-            results,
-          });
-        }
-        return res.status(400).json({
-          success: false,
-          message: 'List not found',
-        });
-      });
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'List not found',
-      });
+      const results = vehicleModel.getVehiclesFromCategory(data);
+      if (results.length > 0) {
+        const pageInfo = {
+          prev: page > 1 ? `http://localhost:5000/vehicle/category/${data.id_category}?page=${page - 1}&limit=${limit}` : null,
+          next: page < lastPage ? `http://localhost:5000/vehicle/category/${data.id_category}?page=${page + 1}&limit=${limit}` : null,
+          totalData: rowsCount,
+          currentPage: page,
+          lastPage,
+        };
+        return responseHandler(res, 200, 'List Vehicles grouped by category', results, null, pageInfo);
+      }
+      return responseHandler(res, 400, 'List not found', results);
     }
-  });
+    return responseHandler(res, 400, 'List not found');
+  } catch (error) {
+    return responseHandler(res, 500, null, null, 'Unexpected Error');
+  }
 };
 
 // eslint-disable-next-line require-jsdoc
