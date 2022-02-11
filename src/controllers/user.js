@@ -210,7 +210,7 @@ const deleteUser = async (req, res) => {
     if (!req.user || req.user.role > 2) {
       return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
     }
-    if (!idValidator(req.params)) {
+    if (!idValidator(req.params.id)) {
       return responseHandler(res, 400, null, null, 'Invalid id format');
     }
     const { id } = req.params;
