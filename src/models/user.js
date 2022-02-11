@@ -137,3 +137,17 @@ exports.getUserByUsernameAsync = (username) => new Promise((resolve, reject) => 
     resolve(res);
   });
 });
+
+exports.getUserByEmailAsync = (email) => new Promise((resolve, reject) => {
+  db.query('SELECT id, username, email, password, id_role role FROM users where email=?', email, (error, res) => {
+    if (error) reject(error);
+    resolve(res);
+  });
+});
+
+exports.getUserByUsernameOrEmailAsync = (data) => new Promise((resolve, reject) => {
+  db.query('SELECT id, username, email, password, id_role role FROM users WHERE username=? OR email=?', [data.username, data.email], (error, res) => {
+    if (error) reject(error);
+    resolve(res);
+  });
+});
