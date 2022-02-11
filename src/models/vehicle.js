@@ -303,6 +303,7 @@ exports.getVehiclesFromCategory = (data, cb) => {
     v.stock, 
     v.price, 
     v.capacity, 
+    v.image,
     v.is_available, 
     v.has_prepayment, 
     v.reservation_deadline 
@@ -325,6 +326,7 @@ exports.getVehiclesFromCategoryAsync = (data) => new Promise((resolve, reject) =
     v.stock, 
     v.price, 
     v.capacity, 
+    v.image,
     v.is_available, 
     v.has_prepayment, 
     v.reservation_deadline 

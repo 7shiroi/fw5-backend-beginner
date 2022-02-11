@@ -1,5 +1,4 @@
 /* eslint-disable consistent-return */
-const fs = require('fs');
 const vehicleModel = require('../models/vehicle');
 const categoryModel = require('../models/category');
 const {
@@ -8,9 +7,10 @@ const {
   checkBoolean,
   timeValidation,
   idValidator,
-  // vehicleCategoryValidation,
+  varcharValidator,
 } = require('../helpers/validator');
 const responseHandler = require('../helpers/responseHandler');
+const { deleteFile } = require('../helpers/fileHandler');
 
 const { APP_URL } = process.env;
 
@@ -80,7 +80,14 @@ const getVehicles = async (req, res) => {
           currentPage: page,
           lastPage,
         };
-        return responseHandler(res, 200, 'List Vehicles', results, null, pageInfo);
+        const mapResults = results.map((o) => {
+          if (o.image !== null) {
+            // eslint-disable-next-line no-param-reassign
+            o.image = `${APP_URL}/${o.image}`;
+          }
+          return o;
+        });
+        return responseHandler(res, 200, 'List Vehicles', mapResults, null, pageInfo);
       }
       return responseHandler(res, 400, 'List not found', results);
     }
@@ -92,13 +99,20 @@ const getVehicles = async (req, res) => {
 
 const getVehicle = async (req, res) => {
   try {
-    if (idValidator(req.params.id)) {
+    if (!idValidator(req.params.id)) {
       return responseHandler(res, 400, null, null, 'Invalid id format');
     }
     const { id } = req.params;
-    const results = await vehicleModel.getVehicle(id);
+    const results = await vehicleModel.getVehicleAsync(id);
     if (results.length > 0) {
-      return responseHandler(res, 200, 'Detail Vehicle', results[0]);
+      const mapResults = results.map((o) => {
+        if (o.image !== null) {
+          // eslint-disable-next-line no-param-reassign
+          o.image = `${APP_URL}/${o.image}`;
+        }
+        return o;
+      });
+      return responseHandler(res, 200, 'Detail Vehicle', mapResults[0]);
     }
     return responseHandler(res, 404, 'Vehicle not found');
   } catch (error) {
@@ -147,7 +161,7 @@ const getPopularVehicles = async (req, res) => {
     if (rowsCount > 0) {
       const lastPage = Math.ceil(rowsCount / limit);
 
-      const results = await vehicleModel.getPopularVehicles(data);
+      const results = await vehicleModel.getPopularVehiclesAsync(data);
       if (results.length > 0) {
         const pageInfo = {
           prev: page > 1 ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page - 1}&limit=${limit}` : null,
@@ -156,7 +170,14 @@ const getPopularVehicles = async (req, res) => {
           currentPage: page,
           lastPage,
         };
-        return responseHandler(res, 200, 'List Popular Vehicles', results, null, pageInfo);
+        const mapResults = results.map((o) => {
+          if (o.image !== null) {
+          // eslint-disable-next-line no-param-reassign
+            o.image = `${APP_URL}/${o.image}`;
+          }
+          return o;
+        });
+        return responseHandler(res, 200, 'List Popular Vehicles', mapResults, null, pageInfo);
       }
       return responseHandler(res, 400, 'List not found', results);
     }
@@ -177,12 +198,12 @@ const getVehiclesFromCategory = async (req, res) => {
     // eslint-disable-next-line camelcase
     const data = { offset, limit };
     data.id_category = id;
-    const count = vehicleModel.getVehiclesFromCategoryCount(data);
+    const count = await vehicleModel.getVehiclesFromCategoryCountAsync(data);
     const { rowsCount } = count[0];
     if (rowsCount > 0) {
       const lastPage = Math.ceil(rowsCount / limit);
 
-      const results = vehicleModel.getVehiclesFromCategory(data);
+      const results = await vehicleModel.getVehiclesFromCategoryAsync(data);
       if (results.length > 0) {
         const pageInfo = {
           prev: page > 1 ? `http://localhost:5000/vehicle/category/${data.id_category}?page=${page - 1}&limit=${limit}` : null,
@@ -191,7 +212,14 @@ const getVehiclesFromCategory = async (req, res) => {
           currentPage: page,
           lastPage,
         };
-        return responseHandler(res, 200, 'List Vehicles grouped by category', results, null, pageInfo);
+        const mapResults = results.map((o) => {
+          if (o.image !== null) {
+          // eslint-disable-next-line no-param-reassign
+            o.image = `${APP_URL}/${o.image}`;
+          }
+          return o;
+        });
+        return responseHandler(res, 200, 'List Vehicles grouped by category', mapResults, null, pageInfo);
       }
       return responseHandler(res, 400, 'List not found', results);
     }
@@ -263,14 +291,6 @@ function validateDataVehicle(data) {
   }
   return error;
 }
-
-const deleteFile = (filePath) => {
-  fs.rm(filePath, {}, (errMsg) => {
-    if (errMsg) {
-      return new Error('Unexpected Error');
-    }
-  });
-};
 
 const addVehicle = async (req, res) => {
   try {
@@ -344,13 +364,78 @@ const editVehicle = async (req, res) => {
     if (!req.user || req.user.role > 2) {
       return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
     }
-    if (idValidator(req.params.id)) {
+    if (!idValidator(req.params.id)) {
       return responseHandler(res, 400, null, null, 'Invalid id format');
     }
     const { id } = req.params;
-    const data = req.body;
+
+    const getVehicleData = await vehicleModel.getVehicleAsync(id);
+    if (getVehicleData.results === 0) {
+      return responseHandler(res, 400, null, null, 'Vehicle not found');
+    }
+
+    const fillable = [
+      {
+        field: 'name', required: false, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'id_category', required: false, type: 'integer',
+      },
+      {
+        field: 'color', required: false, type: 'varchar', max_length: 30,
+      },
+      {
+        field: 'location', required: false, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'stock', required: false, type: 'integer',
+      },
+      {
+        field: 'price', required: false, type: 'integer',
+      },
+      {
+        field: 'capacity', required: false, type: 'integer',
+      },
+      {
+        field: 'image', required: false, type: 'text',
+      },
+      {
+        field: 'is_available', required: false, type: 'boolean',
+      },
+      {
+        field: 'has_prepayment', required: false, type: 'boolean',
+      },
+      {
+        field: 'reservation_deadline', required: false, type: 'time',
+      },
+    ];
+
+    const error = [];
+    const data = {};
+    fillable.forEach((input) => {
+      if (!req.body[input.field] && input.required) {
+        error.push(`${input.field} cannot be empty`);
+      } else if (req.body[input.field]) {
+        if (input.type === 'integer' && !checkIntegerFormat(req.body[input.field])) {
+          error.push(`Invalid ${input.field} format`);
+        }
+        if (input.type === 'varchar' && !varcharValidator(req.body[input.field].trim(), input.max_length)) {
+          error.push(`Invalid ${input.field} format`);
+        }
+        if (input.type === 'boolean' && !checkBoolean(req.body[input.field])) {
+          error.push(`Invalid ${input.field} format`);
+        }
+        if (input.type === 'time' && !timeValidation(req.body[input.field])) {
+          error.push(`Invalid ${input.field} format`);
+        }
+        if (input.type === 'text' && req.body[input.field].trim().length === 0) {
+          error.push(`Invalid ${input.field} format`);
+        }
+        data[input.field] = req.body[input.field];
+      }
+    });
+
     data.id = parseInt(id, 10);
-    const error = validateDataVehicle(data);
     if (error.length > 0) {
       if (req.file) {
         try {
@@ -365,49 +450,43 @@ const editVehicle = async (req, res) => {
       data.image = req.file.path;
     }
 
-    const categoryCheck = await categoryModel.getCategoryAsync(data.id_category);
-    if (categoryCheck.length > 0) {
-      const vehicleCheck = await vehicleModel.checkVehicleAsync(data);
-      if (vehicleCheck[0].checkCount > 0) {
-        if (req.file) {
-          try {
-            deleteFile(req.file.path);
-          } catch (err) {
-            return responseHandler(res, 500, null, null, err.message);
-          }
-        }
-        return res.status(400).json({
-          success: false,
-          error: 'Vehicle already existed!',
-        });
+    if (data.id_category) {
+      const categoryCheck = await categoryModel.getCategoryAsync(data.id_category);
+      if (categoryCheck.length === 0) {
+        return responseHandler(res, 400, null, null, `Cannot find category with id ${data.id_category}`);
       }
-      const originalData = await vehicleModel.getVehicleAsync(data.id);
-      if (originalData.length === 0) {
+    }
+    const vehicleCheck = await vehicleModel.checkVehicleAsync(data);
+    if (vehicleCheck[0].checkCount > 0) {
+      if (req.file) {
         try {
           deleteFile(req.file.path);
         } catch (err) {
-          return responseHandler(res, 500, null, null, err.message);
-        }
-        return responseHandler(res, 400, null, null, 'Vehicle not found');
-      }
-      if (data.image && originalData[0].image) {
-        try {
-          deleteFile(originalData[0].image);
-        } catch (err) {
-          return responseHandler(res, 500, null, null, err.message);
+          return responseHandler(res, 500, null, null, 'Unexpected Error');
         }
       }
-      await vehicleModel.editVehicleAsync(id, data);
-      const updatedData = await vehicleModel.getVehicleAsync(id);
-      const mapResults = updatedData.map((o) => {
-        if (o.image !== null) {
-          // eslint-disable-next-line no-param-reassign
-          o.image = `${APP_URL}/${o.image}`;
-        }
-        return o;
-      });
-      return responseHandler(res, 200, `Vehicle id ${id} has been edited`, mapResults);
+      return responseHandler(res, 400, null, null, 'New data is duplicate of existing data');
     }
+    if (data.image && getVehicleData[0].image) {
+      try {
+        deleteFile(getVehicleData[0].image);
+      } catch (err) {
+        return responseHandler(res, 500, null, null, 'Unexpected error');
+      }
+    }
+    const updateVehicleData = await vehicleModel.editVehicleAsync(id, data);
+    if (updateVehicleData.affectedRows === 0) {
+      return responseHandler(res, 500, null, null, 'Unexpected error');
+    }
+    const updatedData = await vehicleModel.getVehicleAsync(id);
+    const mapResults = updatedData.map((o) => {
+      if (o.image !== null) {
+        // eslint-disable-next-line no-param-reassign
+        o.image = `${APP_URL}/${o.image}`;
+      }
+      return o;
+    });
+    return responseHandler(res, 200, `Vehicle with id ${id} has been updated`, mapResults[0]);
   } catch (error) {
     if (req.file) {
       try {
@@ -419,13 +498,12 @@ const editVehicle = async (req, res) => {
     return responseHandler(res, 500, null, null, error);
   }
 };
-
 const deleteVehicle = async (req, res) => {
   try {
     if (!req.user || req.user.role > 2) {
       return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
     }
-    if (idValidator(req.params.id)) {
+    if (!idValidator(req.params.id)) {
       return responseHandler(res, 400, null, null, 'Invalid id format');
     }
     const { id } = req.params;
