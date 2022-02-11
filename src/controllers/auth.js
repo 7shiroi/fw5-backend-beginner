@@ -119,7 +119,6 @@ exports.forgotPassword = async (req, res) => {
             });
             return responseHandler(res, 200, 'Your code for your password reset has been sent to your email!');
           } catch (error) {
-            console.log(error);
             return responseHandler(res, 500, null, null, 'Unexpected Error');
           }
         }
