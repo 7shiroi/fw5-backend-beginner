@@ -27,6 +27,18 @@ const enumValidator = (data, options) => options.includes(data);
 
 const comparePassword = (password1, password2) => password1 === password2;
 
+const compareDate = (start, end) => {
+  const dateStart = new Date(start);
+  const dateEnd = new Date(end);
+  if (dateStart < dateEnd) {
+    return -1;
+  }
+  if (dateStart > dateEnd) {
+    return 1;
+  }
+  return 0;
+};
+
 const inputValidator = (req, fillable) => {
   const error = [];
   const data = {};
@@ -84,4 +96,5 @@ module.exports = {
   varcharValidator,
   inputValidator,
   comparePassword,
+  compareDate,
 };
