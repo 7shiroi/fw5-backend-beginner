@@ -80,6 +80,14 @@ exports.checkIfUsernameUsedAsync = (data) => new Promise((resolve, reject) => {
   });
 });
 
+exports.checkIfPhoneNumberUsedAsync = (data) => new Promise((resolve, reject) => {
+  const extraQuery = data.id ? `and id != ${data.id}` : '';
+  db.query(`SELECT COUNT(*) rowsCount FROM users WHERE phone_number=? ${extraQuery}`, [data.phone_number], (error, res) => {
+    if (error) reject(error);
+    resolve(res);
+  });
+});
+
 exports.addUser = (data, cb) => {
   db.query('INSERT INTO users SET ?', data, (error, res) => {
     if (error) throw error;

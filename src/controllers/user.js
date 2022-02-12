@@ -1,11 +1,12 @@
-/* eslint-disable consistent-return */
 const argon2 = require('argon2');
 const userModel = require('../models/user');
 const roleModel = require('../models/role');
 const {
-  idValidator, emailValidation, passwordValidation, phoneNumberValidation, dateValidation,
+  idValidator,
+  inputValidator,
 } = require('../helpers/validator');
 const responseHandler = require('../helpers/responseHandler');
+const { deleteFile } = require('../helpers/fileHandler');
 
 const getUsers = async (req, res) => {
   try {
@@ -56,97 +57,268 @@ const getUser = async (req, res) => {
   }
 };
 
-const getProfile = async (req, res) => {
-  try {
-    if (!idValidator(req.params.id)) {
-      return responseHandler(res, 400, null, null, 'Invalid id format');
-    }
-    let { id } = req.params;
-    id = id || 0;
-    const results = await userModel.getProfileAsync(id);
-    if (results.length > 0) {
-      return responseHandler(res, 200, 'User Profile', results[0]);
-    }
-    return responseHandler(res, 404, 'User not found');
-  } catch (error) {
-    return responseHandler(res, 500, null, null, 'Unexpected Error!');
-  }
-};
-
-// eslint-disable-next-line require-jsdoc
-function validateDataUser(data) {
-  // expected data {email, password, name, phone_number, address,
-  // username, gender, birth_date, picture(nullable)}
-  const error = [];
-
-  if (data.email === undefined || !emailValidation(data.email)) {
-    error.push('Input parameter email salah!');
-  }
-  if (data.password === undefined || !passwordValidation(data.password)) {
-    error.push('Input parameter password salah!');
-  }
-  if (data.name === undefined || data.name.length === 0) {
-    error.push('Input parameter nama salah!');
-  }
-  if (
-    data.phone_number === undefined
-    || !phoneNumberValidation(data.phone_number)
-    || data.phone_number.length < 6
-    || data.phone_number.length > 16
-  ) {
-    error.push('Input parameter nomor telepon salah!');
-  }
-  if (
-    data.address === undefined || data.address.length === 0
-  ) {
-    error.push('Input parameter alamat salah!');
-  }
-  if (
-    data.username === undefined
-    || data.username.length === 0
-  ) {
-    error.push('Input parameter display name salah!');
-  }
-  if (data.username.length > 32) {
-    error.push('Display name terlalu panjang');
-  }
-  if (
-    data.gender === undefined
-    || !['male', 'female'].includes(data.gender.toLowerCase())
-  ) {
-    error.push('Input parameter jenis kelamin salah!');
-  }
-  if (
-    data.birth_date === undefined
-    || !dateValidation(data.birth_date)
-  ) {
-    error.push('Input parameter tanggal lahir salah!');
-  }
-  return error;
-}
-
 const addUser = async (req, res) => {
-  try {
-    if (!req.user || req.user.role > 2) {
-      return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
+  if (!req.user || req.user.role > 2) {
+    if (req.file) {
+      try {
+        deleteFile(req.file.path);
+      } catch (err) {
+        return responseHandler(res, 500, null, null, err.message);
+      }
     }
-    const data = req.body;
-    const error = validateDataUser(data);
+    return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
+  } try {
+    const fillable = [
+      {
+        field: 'name', required: true, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'email', required: true, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'username', required: true, type: 'varchar', max_length: 32,
+      },
+      {
+        field: 'password', required: true, type: 'password', by_pass_validation: true,
+      },
+      {
+        field: 'phone_number', required: false, type: 'varchar', max_length: 16,
+      },
+      {
+        field: 'address', required: false, type: 'text',
+      },
+      {
+        field: 'gender', required: false, type: 'enum', options: ['male', 'female'],
+      },
+      {
+        field: 'birth_date', required: false, type: 'date',
+      },
+      {
+        field: 'id_role', required: false, type: 'integer',
+      },
+    ];
+    const { data, error } = inputValidator(req, fillable);
     if (error.length > 0) {
+      if (req.file) {
+        try {
+          deleteFile(req.file.path);
+        } catch (err) {
+          return responseHandler(res, 500, null, null, err.message);
+        }
+      }
       return responseHandler(res, 400, null, null, error);
     }
 
     const emailFound = await userModel.checkIfEmailUsedAsync(data);
     if (emailFound[0].rowsCount) {
+      if (req.file) {
+        try {
+          deleteFile(req.file.path);
+        } catch (err) {
+          return responseHandler(res, 500, null, null, err.message);
+        }
+      }
       return responseHandler(res, 400, null, null, 'Email has already been used');
     }
     const usernameFound = await userModel.checkIfUsernameUsedAsync(data);
     if (usernameFound[0].rowsCount) {
+      if (req.file) {
+        try {
+          deleteFile(req.file.path);
+        } catch (err) {
+          return responseHandler(res, 500, null, null, err.message);
+        }
+      }
       return responseHandler(res, 400, null, null, 'Username has already been used');
+    }
+
+    if (!data.id_role) {
+      data.id_role = 3;
     }
     const roleFound = await roleModel.getRoleAsync(data.id_role);
     if (roleFound.length === 0) {
+      if (req.file) {
+        try {
+          deleteFile(req.file.path);
+        } catch (err) {
+          return responseHandler(res, 500, null, null, err.message);
+        }
+      }
       return responseHandler(res, 400, null, null, 'User role not found');
+    }
+
+    try {
+      data.password = await argon2.hash(data.password);
+    } catch (err) {
+      if (req.file) {
+        try {
+          deleteFile(req.file.path);
+        } catch (errorMsg) {
+          return responseHandler(res, 500, null, null, errorMsg.message);
+        }
+      }
+      return responseHandler(res, 500, null, null, 'Unexpected error');
+    }
+
+    if (req.file) {
+      data.picture = req.file.path;
+    }
+
+    const addUserData = await userModel.addUserAsync(data);
+    if (addUserData.affectedRows === 0) {
+      if (req.file) {
+        try {
+          deleteFile(req.file.path);
+        } catch (err) {
+          return responseHandler(res, 500, null, null, err.message);
+        }
+      }
+      return responseHandler(res, 500, null, null, 'Unexpected Error');
+    }
+    const insertedData = await userModel.getUserAsync(addUserData.insertId);
+    if (insertedData.length === 0) {
+      if (req.file) {
+        try {
+          deleteFile(req.file.path);
+        } catch (err) {
+          return responseHandler(res, 500, null, null, err.message);
+        }
+      }
+      return responseHandler(res, 500, null, null, 'Unexpected Error');
+    }
+    return responseHandler(res, 200, `${addUserData.affectedRows} user added`, insertedData[0]);
+  } catch (error) {
+    if (req.file) {
+      try {
+        deleteFile(req.file.path);
+      } catch (err) {
+        return responseHandler(res, 500, null, null, err.message);
+      }
+    }
+    return responseHandler(res, 500, null, null, 'Unexpected Error');
+  }
+};
+
+const editUser = async (req, res) => {
+  if (!req.user || req.user.role > 2) {
+    if (req.file) {
+      try {
+        deleteFile(req.file.path);
+      } catch (err) {
+        return responseHandler(res, 500, null, null, err.message);
+      }
+    }
+    return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
+  }
+  try {
+    if (!idValidator(req.params.id)) {
+      return responseHandler(res, 400, null, null, 'Invalid id format');
+    }
+    const fillable = [
+      {
+        field: 'name', required: false, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'email', required: false, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'username', required: false, type: 'varchar', max_length: 32,
+      },
+      {
+        field: 'password', required: false, type: 'password', by_pass_validation: true,
+      },
+      {
+        field: 'phone_number', required: false, type: 'varchar', max_length: 16,
+      },
+      {
+        field: 'address', required: false, type: 'text',
+      },
+      {
+        field: 'gender', required: false, type: 'enum', options: ['male', 'female'],
+      },
+      {
+        field: 'birth_date', required: false, type: 'date',
+      },
+      {
+        field: 'id_role', required: false, type: 'integer',
+      },
+    ];
+
+    const { error, data } = inputValidator(req, fillable);
+    data.id = parseInt(req.params.id, 10);
+
+    if (error.length > 0) {
+      if (req.file) {
+        try {
+          deleteFile(req.file.path);
+        } catch (err) {
+          return responseHandler(res, 500, null, null, err.message);
+        }
+      }
+      return responseHandler(res, 400, null, null, error);
+    }
+    const results = await userModel.getUserAsync(data.id);
+    if (results === 0) {
+      if (req.file) {
+        try {
+          deleteFile(req.file.path);
+        } catch (err) {
+          return responseHandler(res, 500, null, null, err.message);
+        }
+      }
+      return responseHandler(res, 400, null, null, 'User not found');
+    }
+    if (data.email) {
+      const emailFound = await userModel.checkIfEmailUsedAsync(data);
+      if (emailFound[0].rowsCount) {
+        if (req.file) {
+          try {
+            deleteFile(req.file.path);
+          } catch (err) {
+            return responseHandler(res, 500, null, null, err.message);
+          }
+        }
+        return responseHandler(res, 400, null, null, 'Email has already been used');
+      }
+    }
+    if (data.username) {
+      const usernameFound = await userModel.checkIfUsernameUsedAsync(data);
+      if (usernameFound[0].rowsCount) {
+        if (req.file) {
+          try {
+            deleteFile(req.file.path);
+          } catch (err) {
+            return responseHandler(res, 500, null, null, err.message);
+          }
+        }
+        return responseHandler(res, 400, null, null, 'Username has already been used');
+      }
+    }
+    if (data.phone_number) {
+      const phoneNumberFound = await userModel.checkIfPhoneNumberUsedAsync(data);
+      if (phoneNumberFound[0].rowsCount) {
+        if (req.file) {
+          try {
+            deleteFile(req.file.path);
+          } catch (err) {
+            return responseHandler(res, 500, null, null, err.message);
+          }
+        }
+        return responseHandler(res, 400, null, null, 'Phone number has already been used');
+      }
+    }
+    if (data.id_role) {
+      const roleFound = await roleModel.getRoleAsync(data.id_role);
+      if (roleFound.length === 0) {
+        if (req.file) {
+          try {
+            deleteFile(req.file.path);
+          } catch (err) {
+            return responseHandler(res, 500, null, null, err.message);
+          }
+        }
+        return responseHandler(res, 400, null, null, `Id role ${data.id_role} not found`);
+      }
     }
 
     try {
@@ -155,52 +327,33 @@ const addUser = async (req, res) => {
       return responseHandler(res, 500, null, null, 'Unexpected error');
     }
 
-    const result = await userModel.addUserAsync(data);
-    return responseHandler(res, 200, `${result.affectedRows} user added`, data);
+    if (req.file) {
+      if (results[0].picture) {
+        try {
+          deleteFile(results[0].picture);
+        } catch (err) {
+          return responseHandler(res, 500, null, null, err.message);
+        }
+      }
+      data.picture = req.file.path;
+    }
+    const editUserData = await userModel.editUserAsync(data.id, data);
+    if (editUserData.affectedRows === 0) {
+      return responseHandler(res, 500, null, null, 'Unexpected Error');
+    }
+    const updatedData = await userModel.getUserAsync(data.id);
+    if (updatedData.length === 0) {
+      return responseHandler(res, 500, null, null, 'Unexpected Error');
+    }
+    return responseHandler(res, 200, `User with id ${data.id} has been updated`, updatedData);
   } catch (error) {
-    return responseHandler(res, 500, null, null, 'Unexpected Error');
-  }
-};
-
-const editUser = async (req, res) => {
-  try {
-    if (!req.user || req.user.role > 2) {
-      return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
-    }
-    if (!idValidator(req.params.id)) {
-      return responseHandler(res, 400, null, null, 'Invalid id format');
-    }
-    const data = req.body;
-    data.id = req.params.id || 0;
-    const error = validateDataUser(data);
-    if (error.length > 0) {
-      return responseHandler(res, 400, null, null, error);
-    }
-
-    const results = await userModel.getUserAsync(data.id);
-    if (results.length > 0) {
-      const emailFound = await userModel.checkIfEmailUsedAsync(data);
-      if (emailFound[0].rowsCount) {
-        return responseHandler(res, 400, null, null, 'Email has already been used');
-      }
-      const usernameFound = await userModel.checkIfUsernameUsedAsync(data);
-      if (usernameFound[0].rowsCount) {
-        return responseHandler(res, 400, null, null, 'Username has already been used');
-      }
-      const roleFound = await roleModel.getRoleAsync(data.id_role);
-      if (roleFound.length === 0) {
-        return responseHandler(res, 400, null, null, 'User role not found');
-      }
-
+    if (req.file) {
       try {
-        await userModel.editUserAsync(data.id, data, () => responseHandler(res, 200, `User with id ${data.id} has been updated`, data));
+        deleteFile(req.file.path);
       } catch (err) {
-        return responseHandler(res, 500, null, null, 'Unexpected Error');
+        return responseHandler(res, 500, null, null, err.message);
       }
-    } else {
-      return responseHandler(res, 400, null, null, 'User not found');
     }
-  } catch (error) {
     return responseHandler(res, 500, null, null, 'Unexpected Error');
   }
 };
@@ -217,6 +370,13 @@ const deleteUser = async (req, res) => {
 
     const results = await userModel.getUserAsync(id);
     if (results.length > 0) {
+      if (results[0].image) {
+        try {
+          deleteFile(results[0].image);
+        } catch (err) {
+          return responseHandler(res, 500, null, null, err.message);
+        }
+      }
       try {
         await userModel.deleteUserAsync(id);
         return responseHandler(res, 200, `User with id ${id} has been deleted`);
@@ -227,6 +387,13 @@ const deleteUser = async (req, res) => {
       return responseHandler(res, 404, 'User not found');
     }
   } catch (error) {
+    if (req.file) {
+      try {
+        deleteFile(req.file.path);
+      } catch (err) {
+        return responseHandler(res, 500, null, null, err.message);
+      }
+    }
     return responseHandler(res, 500, null, null, 'Unexpected Error');
   }
 };
@@ -237,5 +404,4 @@ module.exports = {
   addUser,
   editUser,
   deleteUser,
-  getProfile,
 };

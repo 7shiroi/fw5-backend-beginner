@@ -16,12 +16,16 @@ const idValidator = (id) => {
   return false;
 };
 
-const varcharValidator = (data, max, min = 1) => {
+const varcharValidator = (data, max = 255, min = 1) => {
   if (data.length >= min && data.length <= max) {
     return true;
   }
   return false;
 };
+
+const enumValidator = (data, options) => options.includes(data);
+
+const comparePassword = (password1, password2) => password1 === password2;
 
 const inputValidator = (req, fillable) => {
   const error = [];
@@ -30,31 +34,38 @@ const inputValidator = (req, fillable) => {
     if (!req.body[input.field] && input.required) {
       error.push(`${input.field} cannot be empty`);
     } else if (req.body[input.field]) {
+      const trimmedBody = req.body[input.field].trim();
       if (input.type === 'integer') {
         if (input.can_zero) {
-          if (!checkIntegerFormatCanZero(req.body[input.field])) {
+          if (!checkIntegerFormatCanZero(trimmedBody)) {
             error.push(`Invalid ${input.field} format`);
           }
-        } else if (!checkIntegerFormat(req.body[input.field])) {
+        } else if (!checkIntegerFormat(trimmedBody)) {
           error.push(`Invalid ${input.field} format`);
         }
       }
-      if (input.type === 'price' && !checkPriceFormat(req.body[input.field])) {
+      if (input.type === 'price' && !checkPriceFormat(trimmedBody)) {
         error.push(`Invalid ${input.field} format`);
       }
-      if (input.type === 'varchar' && !varcharValidator(req.body[input.field].trim(), input.max_length)) {
+      if (input.type === 'varchar' && !varcharValidator(trimmedBody, input.max_length)) {
         error.push(`Invalid ${input.field} format`);
       }
-      if (input.type === 'boolean' && !checkBoolean(req.body[input.field])) {
+      if (input.type === 'boolean' && !checkBoolean(trimmedBody)) {
         error.push(`Invalid ${input.field} format`);
       }
-      if (input.type === 'time' && !timeValidation(req.body[input.field])) {
+      if (input.type === 'time' && !timeValidation(trimmedBody)) {
         error.push(`Invalid ${input.field} format`);
       }
-      if (input.type === 'text' && req.body[input.field].trim().length === 0) {
+      if (input.type === 'text' && trimmedBody.length === 0) {
         error.push(`Invalid ${input.field} format`);
       }
-      data[input.field] = req.body[input.field];
+      if (input.type === 'enum' && !enumValidator(trimmedBody, input.options)) {
+        error.push(`Invalid ${input.field} format`);
+      }
+      if (input.type === 'password' && !input.by_pass_validation && !passwordValidation(trimmedBody, input.options)) {
+        error.push(`Invalid ${input.field} format`);
+      }
+      data[input.field] = trimmedBody;
     }
   });
   return { error, data };
@@ -72,4 +83,5 @@ module.exports = {
   idValidator,
   varcharValidator,
   inputValidator,
+  comparePassword,
 };

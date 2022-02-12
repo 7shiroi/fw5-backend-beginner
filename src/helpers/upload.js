@@ -3,12 +3,20 @@ const responseHandler = require('./responseHandler');
 
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, `uploads${req.baseUrl}`);
+    let { baseUrl } = req;
+    if (baseUrl === '/profile') {
+      baseUrl = '/user';
+    }
+    cb(null, `uploads${baseUrl}`);
   },
   filename(req, file, cb) {
+    let { baseUrl } = req;
+    if (baseUrl === '/profile') {
+      baseUrl = '/user';
+    }
     const fileOriginalName = file.originalname.split('.');
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-    cb(null, `${req.baseUrl}-${uniqueSuffix}.${fileOriginalName[(fileOriginalName.length - 1)]}`);
+    cb(null, `${baseUrl}-${uniqueSuffix}.${fileOriginalName[(fileOriginalName.length - 1)]}`);
   },
 });
 
