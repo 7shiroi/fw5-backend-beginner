@@ -3,11 +3,8 @@ const vehicleModel = require('../models/vehicle');
 const categoryModel = require('../models/category');
 const {
   checkIntegerFormat,
-  checkBoolean,
-  timeValidation,
   idValidator,
-  varcharValidator,
-  checkPriceFormat,
+  inputValidator,
 } = require('../helpers/validator');
 const responseHandler = require('../helpers/responseHandler');
 const { deleteFile } = require('../helpers/fileHandler');
@@ -249,7 +246,7 @@ const addVehicle = async (req, res) => {
         field: 'location', required: true, type: 'varchar', max_length: 100,
       },
       {
-        field: 'stock', required: true, type: 'integer',
+        field: 'stock', required: true, type: 'integer', can_zero: true,
       },
       {
         field: 'price', required: true, type: 'price',
@@ -268,33 +265,7 @@ const addVehicle = async (req, res) => {
       },
     ];
 
-    const error = [];
-    const data = {};
-    fillable.forEach((input) => {
-      if (!req.body[input.field] && input.required) {
-        error.push(`${input.field} cannot be empty`);
-      } else if (req.body[input.field]) {
-        if (input.type === 'integer' && !checkIntegerFormat(req.body[input.field])) {
-          error.push(`Invalid ${input.field} format`);
-        }
-        if (input.type === 'integer' && !checkPriceFormat(req.body[input.field])) {
-          error.push(`Invalid ${input.field} format`);
-        }
-        if (input.type === 'varchar' && !varcharValidator(req.body[input.field].trim(), input.max_length)) {
-          error.push(`Invalid ${input.field} format`);
-        }
-        if (input.type === 'boolean' && !checkBoolean(req.body[input.field])) {
-          error.push(`Invalid ${input.field} format`);
-        }
-        if (input.type === 'time' && !timeValidation(req.body[input.field])) {
-          error.push(`Invalid ${input.field} format`);
-        }
-        if (input.type === 'text' && req.body[input.field].trim().length === 0) {
-          error.push(`Invalid ${input.field} format`);
-        }
-        data[input.field] = req.body[input.field];
-      }
-    });
+    const { error, data } = inputValidator(req, fillable);
 
     if (error.length > 0) {
       if (req.file) {
@@ -352,7 +323,7 @@ const addVehicle = async (req, res) => {
         return responseHandler(res, 500, null, null, err.message);
       }
     }
-    return responseHandler(res, 500, null, null, error);
+    return responseHandler(res, 500, null, null, 'Unexpected Error');
   }
 };
 
@@ -385,7 +356,7 @@ const editVehicle = async (req, res) => {
         field: 'location', required: false, type: 'varchar', max_length: 100,
       },
       {
-        field: 'stock', required: false, type: 'integer',
+        field: 'stock', required: false, type: 'integer', can_zero: true,
       },
       {
         field: 'price', required: false, type: 'integer',
@@ -404,30 +375,7 @@ const editVehicle = async (req, res) => {
       },
     ];
 
-    const error = [];
-    const data = {};
-    fillable.forEach((input) => {
-      if (!req.body[input.field] && input.required) {
-        error.push(`${input.field} cannot be empty`);
-      } else if (req.body[input.field]) {
-        if (input.type === 'integer' && !checkIntegerFormat(req.body[input.field])) {
-          error.push(`Invalid ${input.field} format`);
-        }
-        if (input.type === 'varchar' && !varcharValidator(req.body[input.field].trim(), input.max_length)) {
-          error.push(`Invalid ${input.field} format`);
-        }
-        if (input.type === 'boolean' && !checkBoolean(req.body[input.field])) {
-          error.push(`Invalid ${input.field} format`);
-        }
-        if (input.type === 'time' && !timeValidation(req.body[input.field])) {
-          error.push(`Invalid ${input.field} format`);
-        }
-        if (input.type === 'text' && req.body[input.field].trim().length === 0) {
-          error.push(`Invalid ${input.field} format`);
-        }
-        data[input.field] = req.body[input.field];
-      }
-    });
+    const { error, data } = inputValidator(req, fillable);
 
     data.id = parseInt(id, 10);
     if (error.length > 0) {
