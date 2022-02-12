@@ -1,5 +1,5 @@
 // regex test
-exports.checkIntegerFormat = (data) => /^[1-9][0-9]*/.test(data); // check apakah data isinya hanya digit yang awalnya bukan 0
+exports.checkIntegerFormat = (data) => /^[1-9][0-9]*$/.test(data); // check apakah data isinya hanya digit yang awalnya bukan 0
 exports.checkPriceFormat = (data) => /^[^-0+]\d+.\d{2}?$/.test(data) || /^0$/.test(data);
 exports.checkBoolean = (data) => /^[01]$/.test(data);
 exports.timeValidation = (data) => /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(data);
