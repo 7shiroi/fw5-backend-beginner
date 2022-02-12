@@ -12,11 +12,11 @@ const uploadImage = require('../helpers/upload');
 const { verifyUser } = require('../helpers/auth');
 
 vehicle.get('/', getVehicles);
-vehicle.post('/', verifyUser, uploadImage.single('image'), addVehicle);
+vehicle.post('/', verifyUser, uploadImage('image'), addVehicle);
 vehicle.get('/popular', getPopularVehicles);
 vehicle.get('/category/:id', getVehiclesFromCategory);
 vehicle.get('/:id', getVehicle);
-vehicle.patch('/:id', verifyUser, uploadImage.single('image'), editVehicle);
+vehicle.patch('/:id', verifyUser, uploadImage('image'), editVehicle);
 vehicle.delete('/:id', verifyUser, deleteVehicle);
 
 module.exports = vehicle;
