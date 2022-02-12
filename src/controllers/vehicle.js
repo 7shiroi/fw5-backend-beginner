@@ -3,11 +3,11 @@ const vehicleModel = require('../models/vehicle');
 const categoryModel = require('../models/category');
 const {
   checkIntegerFormat,
-  checkPriceFormat,
   checkBoolean,
   timeValidation,
   idValidator,
   varcharValidator,
+  checkPriceFormat,
 } = require('../helpers/validator');
 const responseHandler = require('../helpers/responseHandler');
 const { deleteFile } = require('../helpers/fileHandler');
@@ -229,77 +229,72 @@ const getVehiclesFromCategory = async (req, res) => {
   }
 };
 
-// eslint-disable-next-line require-jsdoc
-function validateDataVehicle(data) {
-  // expected data {name, id_category, color, location, stock, price, capacity, is_available(0,1),
-  // has_prepayment(0,1), reservation_deadline check string format (00.00), image (nullable)}
-  const error = [];
-
-  if (data.name === undefined || data.name.length === 0) {
-    error.push('Input parameter nama salah!');
-  } else if (data.name.length > 100) {
-    error.push('Input nama terlalu panjang!');
-  }
-  if (data.id_category === undefined || !checkIntegerFormat(data.id_category)) {
-    error.push('Input parameter kategori salah!');
-  }
-  if (data.color === undefined || data.color.length === 0) {
-    error.push('Input parameter warna salah!');
-  } else if (data.color.length > 30) {
-    error.push('Input warna terlalu panjang!');
-  }
-  if (data.location === undefined || data.location.length === 0) {
-    error.push('Input parameter lokasi salah!');
-  } else if (data.location.length > 100) {
-    error.push('Input lokasi terlalu panjang!');
-  }
-  if (
-    data.stock === undefined
-    || !checkIntegerFormat(data.stock)
-  ) {
-    error.push('Input parameter stock salah!');
-  }
-  if (
-    data.price === undefined
-    || !checkPriceFormat(data.price)
-  ) {
-    error.push('Input parameter harga salah!');
-  }
-  if (
-    data.capacity === undefined
-    || !checkIntegerFormat(data.capacity)
-  ) {
-    error.push('Input parameter capacity salah!');
-  }
-  if (
-    data.is_available !== undefined
-    && !checkBoolean(data.is_available)
-  ) {
-    error.push('Input parameter is_available salah!');
-  }
-  if (
-    data.has_prepayment !== undefined
-    && !checkBoolean(data.has_prepayment)
-  ) {
-    error.push('Input parameter has_prepayment salah!');
-  }
-  if (
-    data.reservation_deadline !== undefined
-    && !timeValidation(data.reservation_deadline)
-  ) {
-    error.push('Input parameter reservation_deadline salah!');
-  }
-  return error;
-}
-
 const addVehicle = async (req, res) => {
   try {
     if (!req.user || req.user.role > 2) {
       return responseHandler(res, 403, 'FORBIDEN! You are not authorized to do this action!');
     }
-    const data = req.body;
-    const error = validateDataVehicle(data);
-    // const vehicleCategoryCheck = await vehicleCategoryValidation(req.body.id_category);
+
+    const fillable = [
+      {
+        field: 'name', required: true, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'id_category', required: true, type: 'integer',
+      },
+      {
+        field: 'color', required: true, type: 'varchar', max_length: 30,
+      },
+      {
+        field: 'location', required: true, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'stock', required: true, type: 'integer',
+      },
+      {
+        field: 'price', required: true, type: 'price',
+      },
+      {
+        field: 'capacity', required: true, type: 'integer',
+      },
+      {
+        field: 'is_available', required: false, type: 'boolean',
+      },
+      {
+        field: 'has_prepayment', required: false, type: 'boolean',
+      },
+      {
+        field: 'reservation_deadline', required: false, type: 'time',
+      },
+    ];
+
+    const error = [];
+    const data = {};
+    fillable.forEach((input) => {
+      if (!req.body[input.field] && input.required) {
+        error.push(`${input.field} cannot be empty`);
+      } else if (req.body[input.field]) {
+        if (input.type === 'integer' && !checkIntegerFormat(req.body[input.field])) {
+          error.push(`Invalid ${input.field} format`);
+        }
+        if (input.type === 'integer' && !checkPriceFormat(req.body[input.field])) {
+          error.push(`Invalid ${input.field} format`);
+        }
+        if (input.type === 'varchar' && !varcharValidator(req.body[input.field].trim(), input.max_length)) {
+          error.push(`Invalid ${input.field} format`);
+        }
+        if (input.type === 'boolean' && !checkBoolean(req.body[input.field])) {
+          error.push(`Invalid ${input.field} format`);
+        }
+        if (input.type === 'time' && !timeValidation(req.body[input.field])) {
+          error.push(`Invalid ${input.field} format`);
+        }
+        if (input.type === 'text' && req.body[input.field].trim().length === 0) {
+          error.push(`Invalid ${input.field} format`);
+        }
+        data[input.field] = req.body[input.field];
+      }
+    });
 
     if (error.length > 0) {
       if (req.file) {
@@ -316,37 +311,39 @@ const addVehicle = async (req, res) => {
     }
 
     const categoryCheck = await categoryModel.getCategoryAsync(data.id_category);
-    if (categoryCheck.length > 0) {
-      const vehicleCheck = await vehicleModel.checkVehicleAsync(data);
-      if (vehicleCheck[0].checkCount > 0) {
-        if (req.file) {
-          try {
-            deleteFile(req.file.path);
-          } catch (err) {
-            return responseHandler(res, 500, null, null, err.message);
-          }
+    if (categoryCheck.length === 0) {
+      if (req.file) {
+        try {
+          deleteFile(req.file.path);
+        } catch (err) {
+          return responseHandler(res, 500, null, null, err.message);
         }
-        return responseHandler(res, 400, null, null, 'Vehicle already existed');
       }
-      const addVehicleData = await vehicleModel.addVehicleAsync(data);
-      const insertedData = await vehicleModel.getVehicleAsync(addVehicleData.insertId);
-      const mapResults = insertedData.map((o) => {
-        if (o.image !== null) {
-          // eslint-disable-next-line no-param-reassign
-          o.image = `${APP_URL}/${o.image}`;
+      return responseHandler(res, 400, null, null, `Category with id ${data.id_category} not found`);
+    }
+
+    const vehicleCheck = await vehicleModel.checkVehicleAsync(data);
+    if (vehicleCheck[0].checkCount > 0) {
+      if (req.file) {
+        try {
+          deleteFile(req.file.path);
+        } catch (err) {
+          return responseHandler(res, 500, null, null, err.message);
         }
-        return o;
-      });
-      return responseHandler(res, 201, `${addVehicleData.affectedRows} vehicle added`, mapResults);
-    }
-    if (req.file) {
-      try {
-        deleteFile(req.file.path);
-      } catch (err) {
-        return responseHandler(res, 500, null, null, err.message);
       }
+      return responseHandler(res, 400, null, null, 'Vehicle already existed');
     }
-    return responseHandler(res, 400, null, null, `Category with id ${data.id_category} not found`);
+
+    const addVehicleData = await vehicleModel.addVehicleAsync(data);
+    const insertedData = await vehicleModel.getVehicleAsync(addVehicleData.insertId);
+    const mapResults = insertedData.map((o) => {
+      if (o.image !== null) {
+        // eslint-disable-next-line no-param-reassign
+        o.image = `${APP_URL}/${o.image}`;
+      }
+      return o;
+    });
+    return responseHandler(res, 201, `${addVehicleData.affectedRows} vehicle added`, mapResults);
   } catch (error) {
     if (req.file) {
       try {
@@ -395,9 +392,6 @@ const editVehicle = async (req, res) => {
       },
       {
         field: 'capacity', required: false, type: 'integer',
-      },
-      {
-        field: 'image', required: false, type: 'text',
       },
       {
         field: 'is_available', required: false, type: 'boolean',
