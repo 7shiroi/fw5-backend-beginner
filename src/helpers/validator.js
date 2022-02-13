@@ -77,6 +77,9 @@ const inputValidator = (req, fillable) => {
       if (input.type === 'password' && !input.by_pass_validation && !passwordValidation(trimmedBody, input.options)) {
         error.push(`Invalid ${input.field} format`);
       }
+      if (input.type === 'email' && !varcharValidator(trimmedBody, input.max_length) && !emailValidation(trimmedBody)) {
+        error.push(`Invalid ${input.field} format`);
+      }
       data[input.field] = trimmedBody;
     }
   });

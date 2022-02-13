@@ -2,7 +2,9 @@
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const responseHandler = require('../helpers/responseHandler');
-const { passwordValidation, emailValidation } = require('../helpers/validator');
+const {
+  passwordValidation, inputValidator, comparePassword,
+} = require('../helpers/validator');
 const userModel = require('../models/user');
 const userReqPassword = require('../models/userRequestPassword');
 const mail = require('../helpers/mail');
@@ -29,47 +31,46 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const {
-      username, email, confirmPassword, name,
-    } = req.body;
-    let { password } = req.body;
-    const err = [];
-    if (!name) {
-      err.push('Name cannot be empty');
-    }
-    if (!username) {
-      err.push('Username cannot be empty');
-    }
-    const usernameCheck = await userModel.getUserByUsernameAsync(username);
+    const fillable = [
+      {
+        field: 'name', required: true, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'email', required: true, type: 'email', max_length: 100,
+      },
+      {
+        field: 'username', required: true, type: 'varchar', max_length: 32,
+      },
+      {
+        field: 'password', required: true, type: 'password',
+      },
+      {
+        field: 'confirmPassword', required: true, type: 'password', by_pass_validation: true,
+      },
+    ];
+    const { error, data } = inputValidator(req, fillable);
+    const usernameCheck = await userModel.getUserByUsernameAsync(data.username);
     if (usernameCheck.length > 0) {
-      err.push('Username has been used');
+      error.push('Username has been used');
     }
-    if (!email || !emailValidation(email)) {
-      err.push('Invalid email format');
-    }
-    const emailCheck = await userModel.getUserByEmailAsync(email);
+    const emailCheck = await userModel.getUserByEmailAsync(data.email);
     if (emailCheck.length > 0) {
-      err.push('Email has been used');
+      error.push('Email has been used');
     }
-    if (!password || !passwordValidation(password)) {
-      err.push('Password must longer than 8 characters and contain at lease 1 Uppercase, 1 Lowercase and 1 Number');
+    if (comparePassword(data.password, data.passwordConfirm)) {
+      error.push('Confirm password is not same');
     }
-    if (password !== confirmPassword) {
-      err.push('Confirm password is not same');
+    if (error.length > 0) {
+      return responseHandler(res, 400, null, null, error);
     }
-    if (err.length > 0) {
-      return responseHandler(res, 400, null, null, err);
-    }
+
+    delete data.confirmPassword;
 
     try {
-      password = await argon2.hash(password);
-    } catch (error) {
+      data.password = await argon2.hash(data.password);
+    } catch (err) {
       return responseHandler(res, 500, null, null, 'Unexpected error');
     }
-
-    const data = {
-      name, username, email, password, id_role: 3,
-    };
 
     const registerUser = await userModel.addUserAsync(data);
     if (registerUser.affectedRows > 0) {
