@@ -1,4 +1,5 @@
 const history = require('express').Router();
+const { verifyUser } = require('../helpers/auth');
 
 const {
   getHistories,
@@ -8,10 +9,10 @@ const {
   deleteHistory,
 } = require('../controllers/history');
 
-history.get('/', getHistories);
-history.get('/:id', getHistory);
-history.post('/', addHistory);
-history.patch('/:id', editHistory);
-history.delete('/:id', deleteHistory);
+history.get('/', verifyUser, getHistories);
+history.get('/:id', verifyUser, getHistory);
+history.post('/', verifyUser, addHistory);
+history.patch('/:id', verifyUser, editHistory);
+history.delete('/:id', verifyUser, deleteHistory);
 
 module.exports = history;

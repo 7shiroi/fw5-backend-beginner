@@ -8,27 +8,30 @@ const vehicleModel = require('../models/vehicle');
 const getHistories = async (req, res) => {
   try {
     let {
-      vehicleName, email, page, limit,
+      search, page, limit,
     } = req.query;
-    vehicleName = vehicleName || '';
-    email = email || '';
-    page = page || 1;
-    limit = limit || 5;
+    search = search || '';
+    page = parseInt(page, 10) || 1;
+    limit = parseInt(limit, 10) || 5;
     const offset = (page - 1) * limit;
     const data = {
-      vehicleName, email, limit, offset,
+      search, limit, offset,
     };
 
-    const count = await historyModel.getHistoriesCount(data);
+    if (req.user.role > 2) {
+      data.id_user = req.user.id;
+    }
+
+    const count = await historyModel.getHistoriesCountAsync(data);
     const { rowsCount } = count[0];
     if (rowsCount > 0) {
       const lastPage = Math.ceil(rowsCount / limit);
 
-      const results = historyModel.getHistories(data);
+      const results = await historyModel.getHistoriesAsync(data);
       if (results.length > 0) {
         const pageInfo = {
-          prev: page > 1 ? `http://localhost:5000/history?vehicleName=${vehicleName}&email=${email}&page=${page - 1}&limit=${limit}` : null,
-          next: page < lastPage ? `http://localhost:5000/history?vehicleName=${vehicleName}&email=${email}&page=${page + 1}&limit=${limit}` : null,
+          prev: page > 1 ? `http://localhost:5000/history?search=${search}&page=${page - 1}&limit=${limit}` : null,
+          next: page < lastPage ? `http://localhost:5000/history?search=${search}&page=${page + 1}&limit=${limit}` : null,
           totalData: rowsCount,
           currentPage: page,
           lastPage,
@@ -50,17 +53,25 @@ const getHistory = async (req, res) => {
     }
     const { id } = req.params;
 
-    const results = await historyModel.getHistoryAsync(id);
-    if (results === 0) {
-      return responseHandler(res, 400, null, null, `History with id ${id} not found!`);
+    let idUser = null;
+    if (req.user.role > 2) {
+      idUser = req.user.id;
     }
-    return responseHandler(res, 200, 'Detail history', results[0]);
+
+    const results = await historyModel.getHistoryAsync(id, idUser);
+    if (results.length > 0) {
+      return responseHandler(res, 200, 'Detail history', results[0]);
+    }
+    return responseHandler(res, 400, null, null, `History with id ${id} not found!`);
   } catch (error) {
     return responseHandler(res, 500, null, null, 'Unexpected Error');
   }
 };
 
 const addHistory = async (req, res) => {
+  if (req.user.role > 2) {
+    return responseHandler(res, 403, null, null, 'You are not authorized to do this action');
+  }
   try {
     const fillable = [
       {
@@ -136,6 +147,9 @@ const addHistory = async (req, res) => {
 };
 
 const editHistory = async (req, res) => {
+  if (req.user.role > 2) {
+    return responseHandler(res, 403, null, null, 'You are not authorized to do this action');
+  }
   try {
     if (!idValidator(req.params.id)) {
       return responseHandler(res, 400, null, null, 'Invalid Id Format!');
@@ -249,6 +263,9 @@ const editHistory = async (req, res) => {
 };
 
 const deleteHistory = async (req, res) => {
+  if (req.user.role > 2) {
+    return responseHandler(res, 403, null, null, 'You are not authorized to do this action');
+  }
   try {
     if (!idValidator(req.params.id)) {
       return responseHandler(res, 400, null, null, 'Invalid Id Format!');
