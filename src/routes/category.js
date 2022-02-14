@@ -1,4 +1,5 @@
 const category = require('express').Router();
+const { verifyUser } = require('../helpers/auth');
 
 const {
   getCategories,
@@ -10,8 +11,8 @@ const {
 
 category.get('/', getCategories);
 category.get('/:id', getCategory);
-category.post('/', addCategory);
-category.patch('/:id', editCategory);
-category.delete('/:id', deleteCategory);
+category.post('/', verifyUser, addCategory);
+category.patch('/:id', verifyUser, editCategory);
+category.delete('/:id', verifyUser, deleteCategory);
 
 module.exports = category;

@@ -38,12 +38,12 @@ exports.getCategoryCount = (data, cb) => {
   });
 };
 
-exports.getCategoryCountAsync = (data, cb) => {
+exports.getCategoryCountAsync = (data) => new Promise((resolve, reject) => {
   db.query(`SELECT COUNT(*) as rowsCount FROM categories WHERE name LIKE '${data.search}%'`, (error, res) => {
-    if (error) throw error;
-    cb(res);
+    if (error) reject(error);
+    resolve(res);
   });
-};
+});
 
 exports.checkCategory = (data, cb) => {
   db.query('SELECT COUNT(*) checkCount from categories WHERE name = ?', [data.name], (error, res) => {
