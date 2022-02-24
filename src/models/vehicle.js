@@ -376,7 +376,6 @@ exports.getVehiclesFromCategoryCountAsync = (data, id) => new Promise((resolve, 
   LEFT JOIN categories c on v.id_category = c.id
   WHERE c.id=${id}
     AND (v.name LIKE '${data.search}%'
-      OR c.name LIKE '${data.search}%'
       OR location LIKE '${data.search}%'
       OR color LIKE '${data.search}%')
   ${extraQueryWhere}`, (error, res) => {
