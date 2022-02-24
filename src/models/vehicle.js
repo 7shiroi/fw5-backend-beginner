@@ -328,7 +328,7 @@ exports.getVehiclesFromCategoryAsync = (data, id) => new Promise((resolve, rejec
   if (data.sort.length > 0) {
     extraQueryOrder += `ORDER BY ${data.sort} ${data.order} `;
   }
-  const q = db.query(`SELECT 
+  db.query(`SELECT 
     v.id, 
     v.name, 
     c.name category, 
@@ -345,7 +345,6 @@ exports.getVehiclesFromCategoryAsync = (data, id) => new Promise((resolve, rejec
   LEFT JOIN categories c on v.id_category = c.id
   WHERE c.id=${id} 
     AND (v.name LIKE '${data.search}%'
-      OR c.name LIKE '${data.search}%'
       OR location LIKE '${data.search}%'
       OR color LIKE '${data.search}%')
     ${extraQueryWhere}
@@ -354,7 +353,6 @@ exports.getVehiclesFromCategoryAsync = (data, id) => new Promise((resolve, rejec
     if (error) reject(error);
     resolve(res);
   });
-  console.log(q.sql);
 });
 
 exports.getVehiclesFromCategoryCount = (data, cb) => {

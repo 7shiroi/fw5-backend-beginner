@@ -198,7 +198,6 @@ const getVehiclesFromCategory = async (req, res) => {
     const dataQuery = {
       search, sort, order, page, limit, isAvailable, hasPrepayment,
     };
-    console.log('data query', dataQuery);
     const error = filterQueryValidation(dataQuery);
 
     if (error.length > 0) {
@@ -229,8 +228,8 @@ const getVehiclesFromCategory = async (req, res) => {
       const results = await vehicleModel.getVehiclesFromCategoryAsync(data, id);
       if (results.length > 0) {
         const pageInfo = {
-          prev: page > 1 ? `http://localhost:5000/vehicle/category/${id}?page=${page - 1}&limit=${limit}` : null,
-          next: page < lastPage ? `http://localhost:5000/vehicle/category/${id}?page=${page + 1}&limit=${limit}` : null,
+          prev: page > 1 ? `http://localhost:5000/vehicle/category/${id}?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page - 1}&limit=${limit}` : null,
+          next: page < lastPage ? `http://localhost:5000/vehicle/category/${id}?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page + 1}&limit=${limit}` : null,
           totalData: rowsCount,
           currentPage: page,
           lastPage,
