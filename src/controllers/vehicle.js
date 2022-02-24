@@ -186,25 +186,51 @@ const getPopularVehicles = async (req, res) => {
 
 const getVehiclesFromCategory = async (req, res) => {
   try {
-    let { page, limit } = req.query;
-    // eslint-disable-next-line camelcase
-    const { id } = req.params;
+    let {
+      search, sort, order, page, limit, isAvailable, hasPrepayment,
+    } = req.query;
+
+    sort = sort || 'name';
+    order = order || 'asc';
+    isAvailable = isAvailable || '';
+    hasPrepayment = hasPrepayment || '';
+
+    const dataQuery = {
+      search, sort, order, page, limit, isAvailable, hasPrepayment,
+    };
+    console.log('data query', dataQuery);
+    const error = filterQueryValidation(dataQuery);
+
+    if (error.length > 0) {
+      return responseHandler(res, 400, null, null, error);
+    }
+
+    search = search || '';
     page = parseInt(page, 10) || 1;
     limit = parseInt(limit, 10) || 5;
+
+    if (page < 1) {
+      page = 1;
+    }
+    if (limit < 1) {
+      limit = 5;
+    }
+
     const offset = (page - 1) * limit;
-    // eslint-disable-next-line camelcase
-    const data = { offset, limit };
-    data.id_category = id;
-    const count = await vehicleModel.getVehiclesFromCategoryCountAsync(data);
+    const data = {
+      search, sort, order, isAvailable, hasPrepayment, offset, limit,
+    };// eslint-disable-next-line camelcase
+    const { id } = req.params;
+    const count = await vehicleModel.getVehiclesFromCategoryCountAsync(data, id);
     const { rowsCount } = count[0];
     if (rowsCount > 0) {
       const lastPage = Math.ceil(rowsCount / limit);
 
-      const results = await vehicleModel.getVehiclesFromCategoryAsync(data);
+      const results = await vehicleModel.getVehiclesFromCategoryAsync(data, id);
       if (results.length > 0) {
         const pageInfo = {
-          prev: page > 1 ? `http://localhost:5000/vehicle/category/${data.id_category}?page=${page - 1}&limit=${limit}` : null,
-          next: page < lastPage ? `http://localhost:5000/vehicle/category/${data.id_category}?page=${page + 1}&limit=${limit}` : null,
+          prev: page > 1 ? `http://localhost:5000/vehicle/category/${id}?page=${page - 1}&limit=${limit}` : null,
+          next: page < lastPage ? `http://localhost:5000/vehicle/category/${id}?page=${page + 1}&limit=${limit}` : null,
           totalData: rowsCount,
           currentPage: page,
           lastPage,

@@ -316,8 +316,19 @@ exports.getVehiclesFromCategory = (data, cb) => {
   });
 };
 
-exports.getVehiclesFromCategoryAsync = (data) => new Promise((resolve, reject) => {
-  db.query(`SELECT 
+exports.getVehiclesFromCategoryAsync = (data, id) => new Promise((resolve, reject) => {
+  let extraQueryOrder = '';
+  let extraQueryWhere = '';
+  if (data.isAvailable.length > 0) {
+    extraQueryWhere += `AND is_available = ${data.isAvailable} `;
+  }
+  if (data.hasPrepayment.length > 0) {
+    extraQueryWhere += `AND has_prepayment = ${data.hasPrepayment} `;
+  }
+  if (data.sort.length > 0) {
+    extraQueryOrder += `ORDER BY ${data.sort} ${data.order} `;
+  }
+  const q = db.query(`SELECT 
     v.id, 
     v.name, 
     c.name category, 
@@ -332,11 +343,18 @@ exports.getVehiclesFromCategoryAsync = (data) => new Promise((resolve, reject) =
     v.reservation_deadline 
   FROM vehicles v
   LEFT JOIN categories c on v.id_category = c.id
-  WHERE c.id=${data.id_category}
+  WHERE c.id=${id} 
+    AND (v.name LIKE '${data.search}%'
+      OR c.name LIKE '${data.search}%'
+      OR location LIKE '${data.search}%'
+      OR color LIKE '${data.search}%')
+    ${extraQueryWhere}
+  ${extraQueryOrder}
   LIMIT ${data.limit} OFFSET ${data.offset}`, (error, res) => {
     if (error) reject(error);
     resolve(res);
   });
+  console.log(q.sql);
 });
 
 exports.getVehiclesFromCategoryCount = (data, cb) => {
@@ -348,10 +366,22 @@ exports.getVehiclesFromCategoryCount = (data, cb) => {
   });
 };
 
-exports.getVehiclesFromCategoryCountAsync = (data) => new Promise((resolve, reject) => {
+exports.getVehiclesFromCategoryCountAsync = (data, id) => new Promise((resolve, reject) => {
+  let extraQueryWhere = '';
+  if (data.isAvailable.length > 0) {
+    extraQueryWhere += `AND is_available = ${data.isAvailable} `;
+  }
+  if (data.hasPrepayment.length > 0) {
+    extraQueryWhere += `AND has_prepayment = ${data.hasPrepayment} `;
+  }
   db.query(`SELECT COUNT(*) rowsCount FROM vehicles v
   LEFT JOIN categories c on v.id_category = c.id
-  WHERE c.id=${data.id_category}`, (error, res) => {
+  WHERE c.id=${id}
+    AND (v.name LIKE '${data.search}%'
+      OR c.name LIKE '${data.search}%'
+      OR location LIKE '${data.search}%'
+      OR color LIKE '${data.search}%')
+  ${extraQueryWhere}`, (error, res) => {
     if (error) reject(error);
     resolve(res);
   });
