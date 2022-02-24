@@ -161,8 +161,8 @@ const getPopularVehicles = async (req, res) => {
       const results = await vehicleModel.getPopularVehiclesAsync(data);
       if (results.length > 0) {
         const pageInfo = {
-          prev: page > 1 ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page - 1}&limit=${limit}` : null,
-          next: page < lastPage ? `http://localhost:5000/vehicle?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page + 1}&limit=${limit}` : null,
+          prev: page > 1 ? `http://localhost:5000/vehicle/popular?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page - 1}&limit=${limit}` : null,
+          next: page < lastPage ? `http://localhost:5000/vehicle/popular?search=${search}&isAvailable=${isAvailable}&hasPrepayment=${hasPrepayment}&sort=${sort}&order=${order}&page=${page + 1}&limit=${limit}` : null,
           totalData: rowsCount,
           currentPage: page,
           lastPage,
