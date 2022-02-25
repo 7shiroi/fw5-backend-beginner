@@ -25,6 +25,9 @@ const filterQueryValidation = (data) => {
   if (data.hasPrepayment.length > 0 && ![0, 1].includes(parseInt(data.hasPrepayment, 10))) {
     error.push('Prepayment filter query invalid!');
   }
+  if (data.hasPrepayment.length > 0 && !checkIntegerFormat(data.idCategory)) {
+    error.push('IdCategory query invalid');
+  }
 
   if (data.page !== undefined && !checkIntegerFormat(data.page)) {
     error.push('Page query invalid!');
@@ -38,21 +41,29 @@ const filterQueryValidation = (data) => {
 const getVehicles = async (req, res) => {
   try {
     let {
-      search, sort, order, page, limit, isAvailable, hasPrepayment,
+      search, sort, order, page, limit, isAvailable, hasPrepayment, idCategory,
     } = req.query;
 
     sort = sort || 'name';
     order = order || 'asc';
     isAvailable = isAvailable || '';
     hasPrepayment = hasPrepayment || '';
+    idCategory = idCategory || '';
 
     const dataQuery = {
-      search, sort, order, page, limit, isAvailable, hasPrepayment,
+      search, sort, order, page, limit, isAvailable, hasPrepayment, idCategory,
     };
     const error = filterQueryValidation(dataQuery);
 
     if (error.length > 0) {
       return responseHandler(res, 400, null, null, error);
+    }
+
+    if (idCategory.length > 0) {
+      const categoryCheck = await categoryModel.getCategoryAsync(idCategory);
+      if (categoryCheck.length === 0) {
+        return responseHandler(res, 400, null, null, `Category with id ${idCategory} not found`);
+      }
     }
 
     search = search || '';
@@ -61,7 +72,7 @@ const getVehicles = async (req, res) => {
 
     const offset = (page - 1) * limit;
     const data = {
-      search, sort, order, isAvailable, hasPrepayment, offset, limit,
+      search, sort, order, isAvailable, hasPrepayment, offset, limit, idCategory,
     };
     const vehicleCount = await vehicleModel.getVehicleCountAsync(data);
     const { rowsCount } = vehicleCount[0];

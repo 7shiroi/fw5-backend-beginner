@@ -10,9 +10,13 @@ exports.getVehicles = (data, cb) => {
   if (data.hasPrepayment.length > 0) {
     extraQueryWhere += `AND has_prepayment = ${data.hasPrepayment} `;
   }
+  if (data.idCategory.length > 0) {
+    extraQueryWhere += `AND c.id = ${data.idCategory} `;
+  }
   if (data.sort.length > 0) {
     extraQueryOrder += `ORDER BY ${data.sort} ${data.order}`;
   }
+
   db.query(`SELECT 
     v.id, 
     v.name, 
@@ -29,7 +33,6 @@ exports.getVehicles = (data, cb) => {
   FROM vehicles v
   LEFT JOIN categories c on v.id_category = c.id
   WHERE (v.name LIKE '${data.search}%'
-    OR c.name LIKE '${data.search}%'
     OR location LIKE '${data.search}%'
     OR color LIKE '${data.search}%')
     ${extraQueryWhere}
@@ -50,6 +53,9 @@ exports.getVehiclesAsync = (data) => new Promise((resolve, reject) => {
   if (data.hasPrepayment.length > 0) {
     extraQueryWhere += `AND has_prepayment = ${data.hasPrepayment} `;
   }
+  if (data.idCategory.length > 0) {
+    extraQueryWhere += `AND c.id = ${data.idCategory} `;
+  }
   if (data.sort.length > 0) {
     extraQueryOrder += `ORDER BY ${data.sort} ${data.order}`;
   }
@@ -69,7 +75,6 @@ exports.getVehiclesAsync = (data) => new Promise((resolve, reject) => {
   FROM vehicles v
   LEFT JOIN categories c on v.id_category = c.id
   WHERE (v.name LIKE '${data.search}%'
-    OR c.name LIKE '${data.search}%'
     OR location LIKE '${data.search}%'
     OR color LIKE '${data.search}%')
     ${extraQueryWhere}
@@ -109,10 +114,12 @@ exports.getVehicleCountAsync = (data) => new Promise((resolve, reject) => {
   if (data.hasPrepayment.length > 0) {
     extraQueryWhere += `AND has_prepayment = ${data.hasPrepayment} `;
   }
+  if (data.idCategory.length > 0) {
+    extraQueryWhere += `AND c.id = ${data.idCategory} `;
+  }
   db.query(`SELECT COUNT(*) as rowsCount FROM vehicles v
   LEFT JOIN categories c on v.id_category = c.id
   WHERE (v.name LIKE '${data.search}%'
-    OR c.name LIKE '${data.search}%'
     OR location LIKE '${data.search}%'
     OR color LIKE '${data.search}%')
     ${extraQueryWhere}`, (error, res) => {
