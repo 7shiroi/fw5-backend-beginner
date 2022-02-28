@@ -25,7 +25,7 @@ const filterQueryValidation = (data) => {
   if (data.hasPrepayment.length > 0 && ![0, 1].includes(parseInt(data.hasPrepayment, 10))) {
     error.push('Prepayment filter query invalid!');
   }
-  if (data.hasPrepayment.length > 0 && !checkIntegerFormat(data.idCategory)) {
+  if (data.idCategory.length > 0 && !checkIntegerFormat(data.idCategory)) {
     error.push('IdCategory query invalid');
   }
 
