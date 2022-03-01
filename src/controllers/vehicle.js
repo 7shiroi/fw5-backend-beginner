@@ -138,9 +138,9 @@ const getPopularVehicles = async (req, res) => {
     order = order || 'asc';
     isAvailable = isAvailable || '';
     hasPrepayment = hasPrepayment || '';
-
+    const idCategory = '';
     const dataQuery = {
-      search, sort, order, page, limit, isAvailable, hasPrepayment,
+      search, sort, order, page, limit, isAvailable, hasPrepayment, idCategory,
     };
     const error = filterQueryValidation(dataQuery);
 
