@@ -205,9 +205,9 @@ const getVehiclesFromCategory = async (req, res) => {
     order = order || 'asc';
     isAvailable = isAvailable || '';
     hasPrepayment = hasPrepayment || '';
-
+    const idCategory = '';
     const dataQuery = {
-      search, sort, order, page, limit, isAvailable, hasPrepayment,
+      search, sort, order, page, limit, isAvailable, hasPrepayment, idCategory,
     };
     const error = filterQueryValidation(dataQuery);
 
@@ -258,6 +258,7 @@ const getVehiclesFromCategory = async (req, res) => {
     }
     return responseHandler(res, 400, 'List not found');
   } catch (error) {
+    console.log(error);
     return responseHandler(res, 500, null, null, 'Unexpected Error');
   }
 };
