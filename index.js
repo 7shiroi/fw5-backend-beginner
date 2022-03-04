@@ -15,7 +15,8 @@ const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 
-app.use(require('./src/routes'), cors(corsOptions));
+app.options('*', cors(corsOptions));
+app.use(require('./src/routes'));
 
 app.use(upload.array());
 app.use('/uploads', express.static('uploads'));
