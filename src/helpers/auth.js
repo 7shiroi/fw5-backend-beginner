@@ -14,13 +14,13 @@ exports.verifyUser = (req, res, next) => {
         if (payload) {
           return next();
         }
-        return responseHandler(res, 403, 'Please login first!');
+        return responseHandler(res, 401, 'Please login first!');
       } catch (err) {
-        return responseHandler(res, 403, 'Please login first!');
+        return responseHandler(res, 401, 'Please login first!');
       }
     } else {
-      return responseHandler(res, 403, 'Please login first!');
+      return responseHandler(res, 401, 'Please login first!');
     }
   }
-  return responseHandler(res, 403, 'Please login first!');
+  return responseHandler(res, 401, 'Please login first!');
 };
