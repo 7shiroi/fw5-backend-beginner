@@ -81,6 +81,9 @@ const addHistory = async (req, res) => {
         field: 'id_vehicle', required: true, type: 'integer',
       },
       {
+        field: 'quantity', required: true, type: 'integer',
+      },
+      {
         field: 'date_start', required: true, type: 'date',
       },
       {
@@ -171,6 +174,9 @@ const editHistory = async (req, res) => {
       },
       {
         field: 'id_vehicle', required: false, type: 'integer',
+      },
+      {
+        field: 'quantity', required: false, type: 'integer',
       },
       {
         field: 'date_start', required: false, type: 'date',
