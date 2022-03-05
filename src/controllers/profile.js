@@ -5,12 +5,21 @@ const { inputValidator, comparePassword } = require('../helpers/validator');
 const profileModel = require('../models/profile');
 const userModel = require('../models/user');
 
+const { APP_URL } = process.env;
+
 const getProfile = async (req, res) => {
   try {
     const { id } = req.user;
     const results = await profileModel.getProfile(id);
     if (results.length > 0) {
-      return responseHandler(res, 200, 'User Profile', results[0]);
+      const mapResults = results.map((o) => {
+        if (o.picture !== null) {
+        // eslint-disable-next-line no-param-reassign
+          o.picture = `${APP_URL}/${o.picture}`;
+        }
+        return o;
+      });
+      return responseHandler(res, 200, 'User Profile', mapResults[0]);
     }
     return responseHandler(res, 404, 'User not found');
   } catch (error) {
