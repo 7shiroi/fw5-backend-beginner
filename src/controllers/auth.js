@@ -211,7 +211,7 @@ exports.verifyUser = async (req, res) => {
 
     const codeByIdUser = await otp.getOtpByIdUser({ id_user: idUser, id_otp_type: idOtpType });
     if (codeByIdUser.length === 0) {
-      return responseHandler(res, 400, 'You do not have a code for your verification');
+      return responseHandler(res, 400, 'You do not have a code for your verification or it has been expired!');
     }
     if (data.code !== codeByIdUser[0].code) {
       return responseHandler(res, 400, 'Invalid code!');

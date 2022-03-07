@@ -8,14 +8,19 @@ const vehicleModel = require('../models/vehicle');
 const getHistories = async (req, res) => {
   try {
     let {
-      search, page, limit,
+      search, page, limit, lastCreated,
     } = req.query;
     search = search || '';
     page = parseInt(page, 10) || 1;
     limit = parseInt(limit, 10) || 5;
+    if (parseInt(lastCreated, 10) >= 0) {
+      lastCreated = parseInt(lastCreated, 10);
+    } else {
+      lastCreated = 30;
+    }
     const offset = (page - 1) * limit;
     const data = {
-      search, limit, offset,
+      search, limit, offset, lastCreated,
     };
 
     if (req.user.role > 2) {
@@ -42,6 +47,7 @@ const getHistories = async (req, res) => {
     }
     return responseHandler(res, 400, 'List not found');
   } catch (error) {
+    console.log(error);
     return responseHandler(res, 500, null, null, 'Unexpected Error');
   }
 };
@@ -90,10 +96,10 @@ const addHistory = async (req, res) => {
         field: 'date_end', required: true, type: 'date',
       },
       {
-        field: 'has_returned', required: true, type: 'boolean',
+        field: 'has_returned', required: false, type: 'boolean',
       },
       {
-        field: 'prepayment', required: true, type: 'price',
+        field: 'prepayment', required: false, type: 'price',
       },
     ];
 
