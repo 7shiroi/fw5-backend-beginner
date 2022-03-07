@@ -1,6 +1,6 @@
 const history = require('express').Router();
 const cors = require('cors');
-const { verifyUser } = require('../helpers/auth');
+const { verifyUser, checkVerified } = require('../helpers/auth');
 
 const {
   getHistories,
@@ -16,7 +16,7 @@ const corsOptions = {
 
 history.get('/', cors(corsOptions), verifyUser, getHistories);
 history.get('/:id', cors(corsOptions), verifyUser, getHistory);
-history.post('/', cors(corsOptions), verifyUser, addHistory);
+history.post('/', cors(corsOptions), verifyUser, checkVerified, addHistory);
 history.patch('/:id', cors(corsOptions), verifyUser, editHistory);
 history.delete('/:id', cors(corsOptions), verifyUser, deleteHistory);
 

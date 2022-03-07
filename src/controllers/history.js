@@ -5,6 +5,8 @@ const historyModel = require('../models/history');
 const userModel = require('../models/user');
 const vehicleModel = require('../models/vehicle');
 
+const { APP_URL } = process.env;
+
 const getHistories = async (req, res) => {
   try {
     let {
@@ -34,6 +36,13 @@ const getHistories = async (req, res) => {
 
       const results = await historyModel.getHistoriesAsync(data);
       if (results.length > 0) {
+        const mapResults = results.map((o) => {
+          if (o.image !== null) {
+          // eslint-disable-next-line no-param-reassign
+            o.image = `${APP_URL}/${o.image}`;
+          }
+          return o;
+        });
         const pageInfo = {
           prev: page > 1 ? `http://localhost:5000/history?search=${search}&page=${page - 1}&limit=${limit}` : null,
           next: page < lastPage ? `http://localhost:5000/history?search=${search}&page=${page + 1}&limit=${limit}` : null,
@@ -41,13 +50,12 @@ const getHistories = async (req, res) => {
           currentPage: page,
           lastPage,
         };
-        return responseHandler(res, 200, 'List histories', results, null, pageInfo);
+        return responseHandler(res, 200, 'List histories', mapResults, null, pageInfo);
       }
       return responseHandler(res, 400, 'List not found', results);
     }
     return responseHandler(res, 400, 'List not found');
   } catch (error) {
-    console.log(error);
     return responseHandler(res, 500, null, null, 'Unexpected Error');
   }
 };
@@ -75,9 +83,6 @@ const getHistory = async (req, res) => {
 };
 
 const addHistory = async (req, res) => {
-  if (req.user.role > 2) {
-    return responseHandler(res, 403, null, null, 'You are not authorized to do this action');
-  }
   try {
     const fillable = [
       {

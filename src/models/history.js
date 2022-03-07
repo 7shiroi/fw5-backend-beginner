@@ -15,12 +15,22 @@ exports.getHistories = (data, cb) => {
 exports.getHistoriesAsync = (data) => new Promise((resolve, reject) => {
   let extraQueryWhere = '';
   if (data.id_user) {
-    extraQueryWhere = `AND id_user = ${data.id_user}`;
+    extraQueryWhere = ` AND id_user = ${data.id_user}`;
   }
   if (data.lastCreated >= 0) {
-    extraQueryWhere += `AND DATE_SUB(CURDATE(),INTERVAL ${data.lastCreated} DAY) <= h.created_at`;
+    extraQueryWhere += ` AND DATE_SUB(CURDATE(),INTERVAL ${data.lastCreated} DAY) <= h.created_at`;
   }
-  db.query(`SELECT h.id history_id, u.email, u.name 'user_name', v.name vehicle_name, h.date_start, h.date_end, h.has_returned, h.prepayment FROM histories h 
+  db.query(`SELECT 
+    h.id history_id, 
+    u.email, 
+    u.name 'user_name', 
+    v.name vehicle_name, 
+    v.image,
+    h.date_start, 
+    h.date_end, 
+    h.has_returned, 
+    h.prepayment 
+    FROM histories h 
   JOIN vehicles v ON h.id_vehicle = v.id 
   JOIN users u ON h.id_user = u.id
   WHERE (v.name LIKE '${data.search}%'
@@ -71,10 +81,10 @@ exports.getHistoriesCount = (data, cb) => {
 exports.getHistoriesCountAsync = (data) => new Promise((resolve, reject) => {
   let extraQueryWhere = '';
   if (data.id_user) {
-    extraQueryWhere += `AND id_user = ${data.id_user}`;
+    extraQueryWhere += ` AND id_user = ${data.id_user}`;
   }
   if (data.lastCreated >= 0) {
-    extraQueryWhere += `AND DATE_SUB(CURDATE(),INTERVAL ${data.lastCreated} DAY) <= h.created_at`;
+    extraQueryWhere += ` AND DATE_SUB(CURDATE(),INTERVAL ${data.lastCreated} DAY) <= h.created_at`;
   }
   db.query(`SELECT COUNT(*) rowsCount FROM histories h
   JOIN vehicles v ON h.id_vehicle = v.id 
