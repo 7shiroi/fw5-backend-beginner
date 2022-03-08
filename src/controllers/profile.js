@@ -70,6 +70,7 @@ const updateProfile = async (req, res) => {
       return responseHandler(res, 400, null, null, error);
     }
 
+    data.id = results[0].id;
     if (data.email) {
       const emailFound = await userModel.checkIfEmailUsedAsync(data);
       if (emailFound[0].rowsCount) {
