@@ -8,6 +8,7 @@ const {
   deleteVehicle,
   getPopularVehicles,
   getVehiclesFromCategory,
+  getLocations,
 } = require('../controllers/vehicle');
 const uploadImage = require('../helpers/upload');
 const { verifyUser } = require('../helpers/auth');
@@ -19,6 +20,7 @@ const corsOptions = {
 vehicle.get('/', cors(corsOptions), getVehicles);
 vehicle.post('/', verifyUser, uploadImage('image'), addVehicle);
 vehicle.get('/popular', cors(corsOptions), getPopularVehicles);
+vehicle.get('/locations', getLocations);
 vehicle.get('/category/:id', cors(corsOptions), getVehiclesFromCategory);
 vehicle.get('/:id', cors(corsOptions), getVehicle);
 vehicle.patch('/:id', verifyUser, uploadImage('image'), editVehicle);

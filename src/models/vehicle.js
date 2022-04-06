@@ -56,8 +56,17 @@ exports.getVehiclesAsync = (data) => new Promise((resolve, reject) => {
   if (data.idCategory.length > 0) {
     extraQueryWhere += `AND c.id = ${data.idCategory} `;
   }
+  if (data.minPrice > 0) {
+    extraQueryWhere += `AND price >= ${data.minPrice} `;
+  }
+  if (data.maxPrice > 0) {
+    extraQueryWhere += `AND price <= ${data.maxPrice} `;
+  }
   if (data.sort.length > 0) {
     extraQueryOrder += `ORDER BY ${data.sort} ${data.order}`;
+  }
+  if (data.location.length > 0) {
+    extraQueryWhere += `AND location = '${data.location}' `;
   }
   db.query(`SELECT 
     v.id, 
@@ -117,10 +126,18 @@ exports.getVehicleCountAsync = (data) => new Promise((resolve, reject) => {
   if (data.idCategory.length > 0) {
     extraQueryWhere += `AND c.id = ${data.idCategory} `;
   }
+  if (data.location.length > 0) {
+    extraQueryWhere += `AND location = '${data.location}' `;
+  }
+  if (data.minPrice > 0) {
+    extraQueryWhere += `AND price >= ${data.minPrice} `;
+  }
+  if (data.maxPrice > 0) {
+    extraQueryWhere += `AND price <= ${data.maxPrice} `;
+  }
   db.query(`SELECT COUNT(*) as rowsCount FROM vehicles v
   LEFT JOIN categories c on v.id_category = c.id
   WHERE (v.name LIKE '${data.search}%'
-    OR location LIKE '${data.search}%'
     OR color LIKE '${data.search}%')
     ${extraQueryWhere}`, (error, res) => {
     if (error) reject(error);
@@ -462,6 +479,13 @@ exports.deleteVehicle = (id, cb) => {
 
 exports.deleteVehicleAsync = (id) => new Promise((resolve, reject) => {
   db.query('DELETE FROM vehicles WHERE id = ?', [id], (error, res) => {
+    if (error) reject(error);
+    resolve(res);
+  });
+});
+
+exports.getLocations = () => new Promise((resolve, reject) => {
+  db.query('SELECT DISTINCT(location) from vehicles', (error, res) => {
     if (error) reject(error);
     resolve(res);
   });

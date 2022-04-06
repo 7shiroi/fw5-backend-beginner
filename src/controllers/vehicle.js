@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 /* eslint-disable consistent-return */
 const vehicleModel = require('../models/vehicle');
 const categoryModel = require('../models/category');
@@ -28,6 +29,15 @@ const filterQueryValidation = (data) => {
   if (data.idCategory.length > 0 && !checkIntegerFormat(data.idCategory)) {
     error.push('IdCategory query invalid');
   }
+  if (data.minPrice.length > 0 && (data.minPrice < 0 || isNaN(data.maxPrice))) {
+    error.push('Minimum price cannot be lower than 0');
+  }
+  if (data.maxPrice.length > 0 && (data.maxPrice < 0 || isNaN(data.maxPrice))) {
+    error.push('Maximum price cannot be lower than 0');
+  }
+  if (data.minPrice && data.maxPrice && data.maxPrice < data.minPrice) {
+    error.push('Maximum price cannot be lower minPrice');
+  }
 
   if (data.page !== undefined && !checkIntegerFormat(data.page)) {
     error.push('Page query invalid!');
@@ -41,7 +51,17 @@ const filterQueryValidation = (data) => {
 const getVehicles = async (req, res) => {
   try {
     let {
-      search, sort, order, page, limit, isAvailable, hasPrepayment, idCategory,
+      search,
+      sort,
+      order,
+      page,
+      limit,
+      isAvailable,
+      hasPrepayment,
+      idCategory,
+      minPrice,
+      maxPrice,
+      location,
     } = req.query;
 
     sort = sort || 'name';
@@ -49,9 +69,22 @@ const getVehicles = async (req, res) => {
     isAvailable = isAvailable || '';
     hasPrepayment = hasPrepayment || '';
     idCategory = idCategory || '';
+    minPrice = parseInt(minPrice, 10);
+    maxPrice = parseInt(maxPrice, 10);
+    location = location || '';
 
     const dataQuery = {
-      search, sort, order, page, limit, isAvailable, hasPrepayment, idCategory,
+      search,
+      sort,
+      order,
+      page,
+      limit,
+      isAvailable,
+      hasPrepayment,
+      idCategory,
+      minPrice,
+      maxPrice,
+      location,
     };
     const error = filterQueryValidation(dataQuery);
 
@@ -72,7 +105,17 @@ const getVehicles = async (req, res) => {
 
     const offset = (page - 1) * limit;
     const data = {
-      search, sort, order, isAvailable, hasPrepayment, offset, limit, idCategory,
+      search,
+      sort,
+      order,
+      isAvailable,
+      hasPrepayment,
+      offset,
+      limit,
+      idCategory,
+      minPrice,
+      maxPrice,
+      location,
     };
     const vehicleCount = await vehicleModel.getVehicleCountAsync(data);
     const { rowsCount } = vehicleCount[0];
@@ -131,7 +174,7 @@ const getVehicle = async (req, res) => {
 const getPopularVehicles = async (req, res) => {
   try {
     let {
-      search, sort, order, page, limit, isAvailable, hasPrepayment,
+      search, sort, order, page, limit, isAvailable, hasPrepayment, minPrice, maxPrice, location,
     } = req.query;
 
     sort = sort || 'name';
@@ -139,8 +182,22 @@ const getPopularVehicles = async (req, res) => {
     isAvailable = isAvailable || '';
     hasPrepayment = hasPrepayment || '';
     const idCategory = '';
+
+    minPrice = parseInt(minPrice, 10);
+    maxPrice = parseInt(maxPrice, 10);
+    location = location || '';
     const dataQuery = {
-      search, sort, order, page, limit, isAvailable, hasPrepayment, idCategory,
+      search,
+      sort,
+      order,
+      page,
+      limit,
+      isAvailable,
+      hasPrepayment,
+      idCategory,
+      minPrice,
+      maxPrice,
+      location,
     };
     const error = filterQueryValidation(dataQuery);
 
@@ -161,7 +218,7 @@ const getPopularVehicles = async (req, res) => {
 
     const offset = (page - 1) * limit;
     const data = {
-      search, sort, order, isAvailable, hasPrepayment, offset, limit,
+      search, sort, order, isAvailable, hasPrepayment, offset, limit, minPrice, maxPrice, location,
     };
 
     const count = await vehicleModel.getPopularVehiclesCountAsync(data);
@@ -258,7 +315,6 @@ const getVehiclesFromCategory = async (req, res) => {
     }
     return responseHandler(res, 400, 'List not found');
   } catch (error) {
-    console.log(error);
     return responseHandler(res, 500, null, null, 'Unexpected Error');
   }
 };
@@ -508,6 +564,15 @@ const deleteVehicle = async (req, res) => {
   }
 };
 
+const getLocations = async (req, res) => {
+  try {
+    const results = await vehicleModel.getLocations();
+    return responseHandler(res, 200, 'List of Registered Locations', results);
+  } catch (error) {
+    return responseHandler(res, 500, null, null, error);
+  }
+};
+
 module.exports = {
   getVehicles,
   getVehicle,
@@ -516,4 +581,5 @@ module.exports = {
   deleteVehicle,
   getPopularVehicles,
   getVehiclesFromCategory,
+  getLocations,
 };

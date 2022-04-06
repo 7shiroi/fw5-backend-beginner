@@ -34,6 +34,7 @@ const updateProfile = async (req, res) => {
     if (results.length === 0) {
       return responseHandler(res, 500, null, null, 'Unexpected Error');
     }
+
     const fillable = [
       {
         field: 'name', required: false, type: 'varchar', max_length: 100,
@@ -130,7 +131,7 @@ const updateProfile = async (req, res) => {
     if (updatedData.length === 0) {
       return responseHandler(res, 500, null, null, 'Unexpected Error');
     }
-    return responseHandler(res, 200, `User with id ${id} has been updated`, updatedData);
+    return responseHandler(res, 200, `User with id ${id} has been updated`, updatedData[0]);
   } catch (error) {
     return responseHandler(res, 500, null, null, 'Unexpected Error!');
   }
