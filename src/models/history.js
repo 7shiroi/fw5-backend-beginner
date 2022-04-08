@@ -58,7 +58,7 @@ exports.getHistoryAsync = (id, idUser = null) => new Promise((resolve, reject) =
   if (idUser) {
     extraQueryWhere = `AND id_user=${idUser}`;
   }
-  db.query(`SELECT h.id history_id, u.email, u.name 'user_name', v.name vehicle_name, h.date_start, h.date_end, h.has_returned, h.prepayment FROM histories h
+  db.query(`SELECT h.id history_id, u.email, u.id 'id_user', u.name 'user_name', v.name vehicle_name, h.date_start, h.date_end, h.has_returned, h.prepayment FROM histories h
   JOIN vehicles v ON h.id_vehicle = v.id 
   JOIN users u ON h.id_user = u.id
   WHERE h.id=? ${extraQueryWhere}`, [id], (error, res) => {

@@ -280,9 +280,6 @@ const editHistory = async (req, res) => {
 };
 
 const deleteHistory = async (req, res) => {
-  if (req.user.role > 2) {
-    return responseHandler(res, 403, null, null, 'You are not authorized to do this action');
-  }
   try {
     if (!idValidator(req.params.id)) {
       return responseHandler(res, 400, null, null, 'Invalid Id Format!');
@@ -294,6 +291,9 @@ const deleteHistory = async (req, res) => {
       return responseHandler(res, 400, null, null, `History with id ${id} is not found`);
     }
 
+    if (req.user.role > 2 && historyData[0].id_user !== req.user.id) {
+      return responseHandler(res, 403, null, null, 'You are not authorized to do this action');
+    }
     const deleteHistoryData = await historyModel.deleteHistoryAsync(id);
     if (deleteHistoryData.affectedRows === 0) {
       return responseHandler(res, 500, null, null, 'Unexpected Error');
