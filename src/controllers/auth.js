@@ -217,6 +217,11 @@ exports.verifyUser = async (req, res) => {
       return responseHandler(res, 400, 'Invalid code!');
     }
 
+    const updateCodeExpiry = await otp.updateExpiryCode(codeByIdUser[0].id_req, { is_expired: 1 });
+    if (updateCodeExpiry.affectedRows === 0) {
+      return responseHandler(res, 500, null, null, 'Unexpected error');
+    }
+
     const verifyUserAccount = await userModel.editUserAsync(idUser, { is_verified: 1 });
     if (verifyUserAccount.affectedRows === 0) {
       return responseHandler(res, 500, null, null, 'Unexpected Error');

@@ -13,7 +13,7 @@ exports.getOtpByEmail = (data) => new Promise((resolve, reject) => {
 });
 
 exports.getOtpByIdUser = (data) => new Promise((resolve, reject) => {
-  db.query(`SELECT id_user, code FROM otp
+  db.query(`SELECT id id_req, id_user, code FROM otp
   WHERE id_user=?
     AND is_expired=0
     AND id_otp_type=?
