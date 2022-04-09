@@ -1,7 +1,7 @@
 const db = require('../helpers/db');
 
 exports.getProfile = (id) => new Promise((resolve, reject) => {
-  db.query('SELECT id, email, name, phone_number, gender, address, username, birth_date, picture, YEAR(created_at) active_since, is_verified FROM users WHERE id=?', [id], (error, res) => {
+  db.query('SELECT id, email, name, phone_number, gender, address, username, birth_date, picture, YEAR(created_at) active_since, is_verified, id_role FROM users WHERE id=?', [id], (error, res) => {
     if (error) reject(error);
     resolve(res);
   });
