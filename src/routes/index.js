@@ -8,6 +8,7 @@ route.use('/user', require('./user'));
 route.use('/history', require('./history'));
 route.use('/auth', require('./auth'));
 route.use('/profile', require('./profile'));
+route.use('/transaction-status', require('./transactionStatus'));
 
 route.get('/popular', getPopularVehicles);
 
