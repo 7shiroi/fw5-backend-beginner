@@ -9,6 +9,7 @@ const {
 } = require('../helpers/validator');
 const responseHandler = require('../helpers/responseHandler');
 const { deleteFile } = require('../helpers/fileHandler');
+const { cloudPathToFileName } = require('../helpers/converter');
 
 const { APP_URL } = process.env;
 
@@ -363,7 +364,7 @@ const addVehicle = async (req, res) => {
     if (error.length > 0) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -378,7 +379,7 @@ const addVehicle = async (req, res) => {
     if (categoryCheck.length === 0) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -390,7 +391,7 @@ const addVehicle = async (req, res) => {
     if (vehicleCheck[0].checkCount > 0) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -411,7 +412,7 @@ const addVehicle = async (req, res) => {
   } catch (error) {
     if (req.file) {
       try {
-        deleteFile(req.file.path);
+        deleteFile(req.file.filename);
       } catch (err) {
         return responseHandler(res, 500, null, null, err.message);
       }
@@ -474,7 +475,7 @@ const editVehicle = async (req, res) => {
     if (error.length > 0) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -495,7 +496,7 @@ const editVehicle = async (req, res) => {
     if (vehicleCheck[0].checkCount > 0) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, 'Unexpected Error');
         }
@@ -504,7 +505,7 @@ const editVehicle = async (req, res) => {
     }
     if (data.image && getVehicleData[0].image) {
       try {
-        deleteFile(getVehicleData[0].image);
+        deleteFile(cloudPathToFileName(getVehicleData[0].image));
       } catch (err) {
         return responseHandler(res, 500, null, null, 'Unexpected error');
       }
@@ -525,7 +526,7 @@ const editVehicle = async (req, res) => {
   } catch (error) {
     if (req.file) {
       try {
-        deleteFile(req.file.path);
+        deleteFile(req.file.filename);
       } catch (err) {
         return responseHandler(res, 500, null, null, err.message);
       }

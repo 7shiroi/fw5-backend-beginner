@@ -62,11 +62,11 @@ exports.getVehiclesAsync = (data) => new Promise((resolve, reject) => {
   if (data.maxPrice > 0) {
     extraQueryWhere += `AND price <= ${data.maxPrice} `;
   }
-  if (data.sort.length > 0) {
-    extraQueryOrder += `ORDER BY ${data.sort} ${data.order}`;
-  }
   if (data.location.length > 0) {
     extraQueryWhere += `AND location = '${data.location}' `;
+  }
+  if (data.sort.length > 0) {
+    extraQueryOrder += `ORDER BY ${data.sort} ${data.order}`;
   }
   db.query(`SELECT 
     v.id, 

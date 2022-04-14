@@ -1,22 +1,37 @@
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 const responseHandler = require('./responseHandler');
 
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    let { baseUrl } = req;
-    if (baseUrl === '/profile') {
-      baseUrl = '/user';
-    }
-    cb(null, `uploads${baseUrl}`);
-  },
-  filename(req, file, cb) {
-    let { baseUrl } = req;
-    if (baseUrl === '/profile') {
-      baseUrl = '/user';
-    }
-    const fileOriginalName = file.originalname.split('.');
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-    cb(null, `${baseUrl}-${uniqueSuffix}.${fileOriginalName[(fileOriginalName.length - 1)]}`);
+const {
+  CLOUD_NAME, CLOUD_API_KEY, CLOUD_API_SECRET, CLOUDINARY_PROJECT_NAME,
+} = process.env;
+
+cloudinary.config({
+  cloud_name: CLOUD_NAME,
+  api_key: CLOUD_API_KEY,
+  api_secret: CLOUD_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: (req) => {
+      let { baseUrl } = req;
+      if (baseUrl === '/profile') {
+        baseUrl = '/user';
+      }
+      return `${CLOUDINARY_PROJECT_NAME}/uploads/${baseUrl}`;
+    },
+    format: async () => 'png',
+    public_id: (req) => {
+      const timestamp = Date.now();
+      let { baseUrl } = req;
+      if (baseUrl === '/profile') {
+        baseUrl = '/user';
+      }
+      return `${baseUrl}-${timestamp}`;
+    },
   },
 });
 

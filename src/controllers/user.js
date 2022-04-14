@@ -7,6 +7,7 @@ const {
 } = require('../helpers/validator');
 const responseHandler = require('../helpers/responseHandler');
 const { deleteFile } = require('../helpers/fileHandler');
+const { cloudPathToFileName } = require('../helpers/converter');
 
 const getUsers = async (req, res) => {
   try {
@@ -61,7 +62,7 @@ const addUser = async (req, res) => {
   if (!req.user || req.user.role > 2) {
     if (req.file) {
       try {
-        deleteFile(req.file.path);
+        deleteFile(req.file.filename);
       } catch (err) {
         return responseHandler(res, 500, null, null, err.message);
       }
@@ -101,7 +102,7 @@ const addUser = async (req, res) => {
     if (error.length > 0) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -113,7 +114,7 @@ const addUser = async (req, res) => {
     if (emailFound[0].rowsCount) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -124,7 +125,7 @@ const addUser = async (req, res) => {
     if (usernameFound[0].rowsCount) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -139,7 +140,7 @@ const addUser = async (req, res) => {
     if (roleFound.length === 0) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -152,7 +153,7 @@ const addUser = async (req, res) => {
     } catch (err) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (errorMsg) {
           return responseHandler(res, 500, null, null, errorMsg.message);
         }
@@ -168,7 +169,7 @@ const addUser = async (req, res) => {
     if (addUserData.affectedRows === 0) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -179,7 +180,7 @@ const addUser = async (req, res) => {
     if (insertedData.length === 0) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -190,7 +191,7 @@ const addUser = async (req, res) => {
   } catch (error) {
     if (req.file) {
       try {
-        deleteFile(req.file.path);
+        deleteFile(req.file.filename);
       } catch (err) {
         return responseHandler(res, 500, null, null, err.message);
       }
@@ -203,7 +204,7 @@ const editUser = async (req, res) => {
   if (!req.user || req.user.role > 2) {
     if (req.file) {
       try {
-        deleteFile(req.file.path);
+        deleteFile(req.file.filename);
       } catch (err) {
         return responseHandler(res, 500, null, null, err.message);
       }
@@ -250,7 +251,7 @@ const editUser = async (req, res) => {
     if (error.length > 0) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -261,7 +262,7 @@ const editUser = async (req, res) => {
     if (results === 0) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -273,7 +274,7 @@ const editUser = async (req, res) => {
       if (emailFound[0].rowsCount) {
         if (req.file) {
           try {
-            deleteFile(req.file.path);
+            deleteFile(req.file.filename);
           } catch (err) {
             return responseHandler(res, 500, null, null, err.message);
           }
@@ -286,7 +287,7 @@ const editUser = async (req, res) => {
       if (usernameFound[0].rowsCount) {
         if (req.file) {
           try {
-            deleteFile(req.file.path);
+            deleteFile(req.file.filename);
           } catch (err) {
             return responseHandler(res, 500, null, null, err.message);
           }
@@ -299,7 +300,7 @@ const editUser = async (req, res) => {
       if (phoneNumberFound[0].rowsCount) {
         if (req.file) {
           try {
-            deleteFile(req.file.path);
+            deleteFile(req.file.filename);
           } catch (err) {
             return responseHandler(res, 500, null, null, err.message);
           }
@@ -312,7 +313,7 @@ const editUser = async (req, res) => {
       if (roleFound.length === 0) {
         if (req.file) {
           try {
-            deleteFile(req.file.path);
+            deleteFile(req.file.filename);
           } catch (err) {
             return responseHandler(res, 500, null, null, err.message);
           }
@@ -330,7 +331,7 @@ const editUser = async (req, res) => {
     if (req.file) {
       if (results[0].picture) {
         try {
-          deleteFile(results[0].picture);
+          deleteFile(cloudPathToFileName(results[0].picture));
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -349,7 +350,7 @@ const editUser = async (req, res) => {
   } catch (error) {
     if (req.file) {
       try {
-        deleteFile(req.file.path);
+        deleteFile(req.file.filename);
       } catch (err) {
         return responseHandler(res, 500, null, null, err.message);
       }
@@ -389,7 +390,7 @@ const deleteUser = async (req, res) => {
   } catch (error) {
     if (req.file) {
       try {
-        deleteFile(req.file.path);
+        deleteFile(req.file.filename);
       } catch (err) {
         return responseHandler(res, 500, null, null, err.message);
       }

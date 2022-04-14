@@ -62,6 +62,9 @@ const inputValidator = (req, fillable) => {
       if (input.type === 'varchar' && !varcharValidator(trimmedBody, input.max_length)) {
         error.push(`Invalid ${input.field} format`);
       }
+      if (input.type === 'phonenumber' && !phoneNumberValidation(trimmedBody)) {
+        error.push(`Invalid ${input.field} format`);
+      }
       if (input.type === 'boolean' && !checkBoolean(trimmedBody)) {
         error.push(`Invalid ${input.field} format`);
       }

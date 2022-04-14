@@ -1,4 +1,5 @@
 const argon2 = require('argon2');
+const { cloudPathToFileName } = require('../helpers/converter');
 const { deleteFile } = require('../helpers/fileHandler');
 const responseHandler = require('../helpers/responseHandler');
 const { inputValidator, comparePassword } = require('../helpers/validator');
@@ -46,7 +47,7 @@ const updateProfile = async (req, res) => {
         field: 'username', required: false, type: 'varchar', max_length: 32,
       },
       {
-        field: 'phone_number', required: false, type: 'varchar', max_length: 16,
+        field: 'phone_number', required: false, type: 'phonenumber', max_length: 16,
       },
       {
         field: 'address', required: false, type: 'text',
@@ -63,7 +64,7 @@ const updateProfile = async (req, res) => {
     if (error.length > 0) {
       if (req.file) {
         try {
-          deleteFile(req.file.path);
+          deleteFile(req.file.filename);
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
@@ -77,7 +78,7 @@ const updateProfile = async (req, res) => {
       if (emailFound[0].rowsCount) {
         if (req.file) {
           try {
-            deleteFile(req.file.path);
+            deleteFile(req.file.filename);
           } catch (err) {
             return responseHandler(res, 500, null, null, err.message);
           }
@@ -90,7 +91,7 @@ const updateProfile = async (req, res) => {
       if (usernameFound[0].rowsCount) {
         if (req.file) {
           try {
-            deleteFile(req.file.path);
+            deleteFile(req.file.filename);
           } catch (err) {
             return responseHandler(res, 500, null, null, err.message);
           }
@@ -103,7 +104,7 @@ const updateProfile = async (req, res) => {
       if (phoneNumberFound[0].rowsCount) {
         if (req.file) {
           try {
-            deleteFile(req.file.path);
+            deleteFile(req.file.filename);
           } catch (err) {
             return responseHandler(res, 500, null, null, err.message);
           }
@@ -115,7 +116,7 @@ const updateProfile = async (req, res) => {
     if (req.file) {
       if (results[0].picture) {
         try {
-          deleteFile(results[0].picture);
+          deleteFile(cloudPathToFileName(results[0].picture));
         } catch (err) {
           return responseHandler(res, 500, null, null, err.message);
         }
