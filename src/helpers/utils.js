@@ -1,0 +1,3 @@
+const ALPHABETS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+module.exports = { ALPHABETS };

@@ -1,4 +1,5 @@
 /* eslint-disable consistent-return */
+const { randomNumber, randomBookingCode } = require('../helpers/generator');
 const responseHandler = require('../helpers/responseHandler');
 const { inputValidator, idValidator, compareDate } = require('../helpers/validator');
 const historyModel = require('../models/history');
@@ -146,6 +147,9 @@ const addHistory = async (req, res) => {
       return responseHandler(res, 400, null, null, `Invalid prepayment: maximal ${maxPrepayment}`);
     }
 
+    data.id_transaction_status = 1;
+    data.booking_code = randomNumber(8);
+    data.payment_code = randomBookingCode(8, 3);
     const addHistoryData = await historyModel.addHistoryAsync(data);
     if (addHistoryData.affectedRows === 0) {
       return responseHandler(res, 500, null, null, 'Unexpected Error');

@@ -29,10 +29,14 @@ exports.getHistoriesAsync = (data) => new Promise((resolve, reject) => {
     h.date_start, 
     h.date_end, 
     h.has_returned, 
-    h.prepayment 
+    h.prepayment, 
+    ts.name transaction_status, 
+    h.booking_code, 
+    h.payment_code
     FROM histories h 
   JOIN vehicles v ON h.id_vehicle = v.id 
   JOIN users u ON h.id_user = u.id
+  LEFT JOIN transaction_status ts ON h.id_transaction_status = ts.id
   WHERE (v.name LIKE '${data.search}%'
     OR u.email LIKE '${data.search}%'
     OR u.name LIKE '${data.search}%')
@@ -58,9 +62,10 @@ exports.getHistoryAsync = (id, idUser = null) => new Promise((resolve, reject) =
   if (idUser) {
     extraQueryWhere = `AND id_user=${idUser}`;
   }
-  db.query(`SELECT h.id history_id, u.email, u.id 'id_user', u.name 'user_name', v.name vehicle_name, h.date_start, h.date_end, h.has_returned, h.prepayment FROM histories h
+  db.query(`SELECT h.id history_id, u.email, u.id 'id_user', u.name 'user_name', v.name vehicle_name, h.date_start, h.date_end, h.has_returned, h.prepayment, ts.name transaction_status, h.booking_code, h.payment_code FROM histories h
   JOIN vehicles v ON h.id_vehicle = v.id 
   JOIN users u ON h.id_user = u.id
+  JOIN transaction_status ts ON h.id_transaction_status = ts.id
   WHERE h.id=? ${extraQueryWhere}`, [id], (error, res) => {
     if (error) reject(error);
     resolve(res);
