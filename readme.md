@@ -5,9 +5,13 @@ A backend programm for Vehicles Renter application.
 
 ### How to Use This Project Locally
 Clone this project to your local computer
+
 Import vehicle_rent.sql to your local mysql database
+
 Create .env file and fill the data which written in .env.example
+
 Install required package with command ```npm i```
+
 Run the app with ```npm run dev```
 
 ### Endpoints
