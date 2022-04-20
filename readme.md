@@ -1,7 +1,14 @@
-# Backend Beginner
+# Vehicle Renter Backend
 
 ### About
-A backend programm for vehicles rental application.
+A backend programm for Vehicles Renter application.
+
+### How to Use This Project Locally
+Clone this project to your local computer
+Import vehicle_rent.sql to your local mysql database
+Create .env file and fill the data which written in .env.example
+Install required package with command ```npm i```
+Run the app with ```npm run dev```
 
 ### Endpoints
 | **url** | **Method** | **Description** |
@@ -29,3 +36,10 @@ A backend programm for vehicles rental application.
 | history | POST | Insert a history data |
 | history/:id | PATCH | Update a history data |
 | history/:id | DELETE | Delete a history data |
+| transaction-status | GET | Get a list of transaction status data |
+| transaction-status/:id | GET | Get a detailed transaction status data |
+| transaction-status | POST | Insert a transaction status data |
+| transaction-status/:id | PATCH | Update a transaction status data |
+| transaction-status/:id | Delete | Delete a transaction status data |
+| favorite | GET | Get a list of favorite vehicles data of currently logged in user |
+| favorite | POST | Toggle favorite status for a vehicle for currently logged in user |
