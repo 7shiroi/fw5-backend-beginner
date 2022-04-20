@@ -5,6 +5,7 @@ const { inputValidator, idValidator, compareDate } = require('../helpers/validat
 const historyModel = require('../models/history');
 const userModel = require('../models/user');
 const vehicleModel = require('../models/vehicle');
+const transactionStatusModel = require('../models/transactionStatus');
 
 const { APP_URL } = process.env;
 
@@ -185,9 +186,6 @@ const editHistory = async (req, res) => {
     }
     const fillable = [
       {
-        field: 'id_user', required: false, type: 'integer',
-      },
-      {
         field: 'id_vehicle', required: false, type: 'integer',
       },
       {
@@ -205,6 +203,9 @@ const editHistory = async (req, res) => {
       {
         field: 'prepayment', required: false, type: 'price',
       },
+      {
+        field: 'id_transaction_status', required: false, type: 'integer',
+      },
     ];
     const { error, data } = inputValidator(req, fillable);
     if (data.date_start) {
@@ -220,10 +221,12 @@ const editHistory = async (req, res) => {
     if (error.length > 0) {
       return responseHandler(res, 400, null, null, error);
     }
-    if (data.id_user) {
-      const checkUser = await userModel.getUserAsync(data.id_user);
-      if (checkUser.length === 0) {
-        return responseHandler(res, 400, null, null, `User with id ${data.id_user} is not found`);
+
+    if (data.id_transaction_status) {
+      const checkTransactionStatus = await transactionStatusModel
+        .getTransactionStatus(data.id_transaction_status);
+      if (checkTransactionStatus.length === 0) {
+        return responseHandler(res, 400, null, null, `Transaction Status with id ${data.id_transaction_status} is not found`);
       }
     }
 

@@ -65,7 +65,7 @@ exports.getHistoryAsync = (id, idUser = null) => new Promise((resolve, reject) =
   db.query(`SELECT h.id history_id, u.email, u.id 'id_user', u.name 'user_name', v.name vehicle_name, h.date_start, h.date_end, h.has_returned, h.prepayment, ts.name transaction_status, h.booking_code, h.payment_code FROM histories h
   JOIN vehicles v ON h.id_vehicle = v.id 
   JOIN users u ON h.id_user = u.id
-  JOIN transaction_status ts ON h.id_transaction_status = ts.id
+  LEFT JOIN transaction_status ts ON h.id_transaction_status = ts.id
   WHERE h.id=? ${extraQueryWhere}`, [id], (error, res) => {
     if (error) reject(error);
     resolve(res);
