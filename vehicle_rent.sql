@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 07, 2022 at 02:58 AM
+-- Generation Time: Apr 21, 2022 at 05:13 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -59,6 +59,9 @@ CREATE TABLE `histories` (
   `date_end` date NOT NULL,
   `has_returned` tinyint(1) NOT NULL DEFAULT 0,
   `prepayment` float DEFAULT NULL,
+  `id_transaction_status` int(11) NOT NULL,
+  `booking_code` varchar(8) NOT NULL,
+  `payment_code` varchar(8) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -67,58 +70,78 @@ CREATE TABLE `histories` (
 -- Dumping data for table `histories`
 --
 
-INSERT INTO `histories` (`id`, `id_user`, `id_vehicle`, `quantity`, `date_start`, `date_end`, `has_returned`, `prepayment`, `created_at`, `updated_at`) VALUES
-(1, 2, 6, 0, '2022-02-13', '2022-03-13', 0, 24000, '2022-01-28 16:35:27', '2022-02-04 17:49:45'),
-(2, 1, 3, 0, '2021-12-01', '2022-01-23', 0, NULL, '2022-01-28 17:00:14', '2022-02-03 12:01:15'),
-(3, 2, 6, 0, '2021-02-13', '2022-03-13', 0, NULL, '2022-01-28 17:00:26', '2022-02-03 12:08:03'),
-(19, 1, 5, 0, '2022-01-23', '2022-01-23', 0, 180000, '2022-02-02 17:50:04', NULL),
-(20, 5, 6, 0, '2022-02-01', '2022-02-02', 0, NULL, '2022-02-03 12:07:29', '2022-02-03 05:07:11'),
-(21, 1, 3, 0, '2022-01-23', '2022-01-23', 0, NULL, '2022-02-04 16:14:57', NULL),
-(22, 2, 3, 0, '2022-01-23', '2022-01-23', 0, NULL, '2022-02-04 16:15:03', NULL),
-(23, 5, 3, 0, '2022-01-23', '2022-01-23', 0, NULL, '2022-02-04 16:37:28', NULL),
-(24, 5, 5, 0, '2022-01-23', '2022-01-23', 0, NULL, '2022-02-04 16:37:34', NULL),
-(25, 5, 2, 0, '2022-01-23', '2022-01-23', 0, NULL, '2022-02-04 16:37:41', NULL),
-(26, 2, 6, 0, '2021-02-13', '2022-03-13', 0, 24000, '2022-02-04 16:56:15', '2022-02-06 20:26:23'),
-(27, 2, 6, 0, '2020-01-13', '2022-01-13', 0, 24000, '2022-02-04 16:56:27', '2022-02-07 15:10:06'),
-(28, 5, 22, 0, '2022-01-23', '2022-01-23', 0, 0, '2022-02-04 16:59:14', NULL),
-(29, 5, 22, 0, '2022-01-23', '2022-01-23', 0, 0, '2022-02-04 16:59:30', NULL),
-(30, 5, 22, 0, '2022-01-23', '2022-01-23', 0, 40000, '2022-02-04 17:03:14', NULL),
-(31, 2, 42, 0, '2022-01-23', '2022-01-23', 0, 150000, '2022-02-04 17:09:44', NULL),
-(32, 5, 42, 0, '2022-01-23', '2022-01-23', 0, 150000, '2022-02-04 17:12:09', NULL),
-(33, 6, 42, 0, '2022-01-23', '2022-01-23', 0, 150000, '2022-02-04 17:12:13', NULL),
-(34, 8, 41, 0, '2022-01-23', '2022-01-23', 0, 150000, '2022-02-07 10:10:29', NULL),
-(35, 7, 41, 0, '2022-01-23', '2022-01-23', 0, 150000, '2022-02-07 10:10:40', NULL),
-(36, 7, 42, 0, '2022-02-23', '2022-02-23', 0, 150000, '2022-02-07 10:11:32', NULL),
-(37, 4, 11, 0, '2022-01-23', '2022-01-25', 0, 150000, '2022-02-07 10:11:59', NULL),
-(38, 6, 11, 0, '2022-01-23', '2022-01-25', 0, 150000, '2022-02-07 10:12:03', NULL),
-(39, 6, 33, 0, '2022-01-23', '2022-01-25', 0, 150000, '2022-02-07 10:12:12', NULL),
-(40, 5, 33, 0, '2022-01-23', '2022-01-25', 0, 150000, '2022-02-07 10:12:19', NULL),
-(41, 9, 42, 0, '2022-01-23', '2022-01-25', 0, 150000, '2022-02-07 10:13:46', NULL),
-(42, 9, 32, 0, '2022-01-23', '2022-01-25', 0, 150000, '2022-02-07 10:14:26', NULL),
-(43, 9, 22, 0, '2022-01-23', '2022-01-25', 0, 150000, '2022-02-07 10:14:28', NULL),
-(44, 7, 22, 0, '2022-01-23', '2022-01-25', 0, 150000, '2022-02-07 10:14:31', NULL),
-(45, 7, 7, 0, '2022-01-23', '2022-01-25', 0, 150000, '2022-02-07 10:14:59', NULL),
-(46, 7, 7, 0, '2022-01-23', '2022-01-25', 0, 0, '2022-02-07 10:15:07', NULL),
-(59, 7, 7, 0, '2022-01-23', '2022-01-25', 0, NULL, '2022-02-07 10:26:19', NULL),
-(60, 7, 7, 0, '2022-01-23', '2022-01-25', 0, 0, '2022-02-07 10:26:24', NULL),
-(61, 7, 29, 0, '2022-01-23', '2022-01-25', 0, 40000, '2022-02-07 10:32:38', NULL),
-(62, 8, 29, 0, '2022-01-23', '2022-01-25', 0, 40000, '2022-02-07 10:32:42', NULL),
-(63, 8, 29, 0, '2022-01-24', '2022-01-25', 0, 40000, '2022-02-07 15:12:27', NULL),
-(64, 8, 6, 0, '2022-01-24', '2022-01-25', 0, 120000, '2022-02-07 15:13:18', NULL),
-(65, 1, 45, 0, '2022-01-23', '2022-01-23', 0, 40000, '2022-02-12 19:46:51', NULL),
-(67, 1, 45, 0, '2022-01-23', '2022-01-23', 0, 40000, '2022-02-14 11:14:40', NULL),
-(68, 19, 45, 0, '2022-02-23', '2022-02-23', 0, 40000, '2022-02-24 10:05:13', NULL),
-(69, 20, 45, 0, '2022-02-23', '2022-02-23', 0, 40000, '2022-02-24 10:05:21', NULL),
-(70, 20, 60, 0, '2022-02-23', '2022-02-23', 0, 40000, '2022-02-24 10:05:48', NULL),
-(71, 21, 60, 0, '2022-02-23', '2022-02-23', 0, 40000, '2022-02-24 10:05:55', NULL),
-(72, 22, 44, 0, '2022-02-23', '2022-02-23', 0, 40000, '2022-02-24 10:06:11', NULL),
-(73, 23, 44, 0, '2022-02-23', '2022-02-23', 0, 40000, '2022-02-24 10:06:18', NULL),
-(74, 26, 41, 0, '2022-02-23', '2022-02-23', 0, 50000, '2022-02-24 10:06:28', NULL),
-(75, 26, 41, 2, '2022-02-23', '2022-02-23', 0, 50000, '2022-03-05 17:33:49', NULL),
-(76, 26, 60, 2, '2022-02-23', '2022-02-23', 0, NULL, '2022-03-05 15:52:06', '2022-03-06 19:30:30'),
-(77, 12, 60, 2, '0000-00-00', '0000-00-00', 0, 0, '2022-03-06 16:19:55', NULL),
-(78, 12, 60, 2, '2022-02-07', '2022-02-08', 0, 0, '2022-03-06 16:24:41', NULL),
-(79, 12, 53, 1, '2022-02-08', '2022-02-08', 0, 0, '2022-03-06 19:10:03', NULL);
+INSERT INTO `histories` (`id`, `id_user`, `id_vehicle`, `quantity`, `date_start`, `date_end`, `has_returned`, `prepayment`, `id_transaction_status`, `booking_code`, `payment_code`, `created_at`, `updated_at`) VALUES
+(1, 2, 6, 0, '2022-02-13', '2022-03-13', 0, 24000, 0, '', '', '2022-01-28 16:35:27', '2022-02-04 17:49:45'),
+(2, 1, 3, 0, '2021-12-01', '2022-01-23', 0, NULL, 0, '', '', '2022-01-28 17:00:14', '2022-02-03 12:01:15'),
+(3, 2, 6, 0, '2021-02-13', '2022-03-13', 0, NULL, 0, '', '', '2022-01-28 17:00:26', '2022-02-03 12:08:03'),
+(19, 1, 5, 0, '2022-01-23', '2022-01-23', 0, 180000, 0, '', '', '2022-02-02 17:50:04', NULL),
+(20, 5, 6, 0, '2022-02-01', '2022-02-02', 0, NULL, 0, '', '', '2022-02-03 12:07:29', '2022-02-03 05:07:11'),
+(21, 1, 3, 0, '2022-01-23', '2022-01-23', 0, NULL, 0, '', '', '2022-02-04 16:14:57', NULL),
+(22, 2, 3, 0, '2022-01-23', '2022-01-23', 0, NULL, 0, '', '', '2022-02-04 16:15:03', NULL),
+(23, 5, 3, 0, '2022-01-23', '2022-01-23', 0, NULL, 0, '', '', '2022-02-04 16:37:28', NULL),
+(24, 5, 5, 0, '2022-01-23', '2022-01-23', 0, NULL, 0, '', '', '2022-02-04 16:37:34', NULL),
+(25, 5, 2, 0, '2022-01-23', '2022-01-23', 0, NULL, 0, '', '', '2022-02-04 16:37:41', NULL),
+(26, 2, 6, 0, '2021-02-13', '2022-03-13', 0, 24000, 0, '', '', '2022-02-04 16:56:15', '2022-02-06 20:26:23'),
+(27, 2, 6, 0, '2020-01-13', '2022-01-13', 0, 24000, 0, '', '', '2022-02-04 16:56:27', '2022-02-07 15:10:06'),
+(28, 5, 22, 0, '2022-01-23', '2022-01-23', 0, 0, 0, '', '', '2022-02-04 16:59:14', NULL),
+(29, 5, 22, 0, '2022-01-23', '2022-01-23', 0, 0, 0, '', '', '2022-02-04 16:59:30', NULL),
+(30, 5, 22, 0, '2022-01-23', '2022-01-23', 0, 40000, 0, '', '', '2022-02-04 17:03:14', NULL),
+(31, 2, 42, 0, '2022-01-23', '2022-01-23', 0, 150000, 0, '', '', '2022-02-04 17:09:44', NULL),
+(32, 5, 42, 0, '2022-01-23', '2022-01-23', 0, 150000, 0, '', '', '2022-02-04 17:12:09', NULL),
+(33, 6, 42, 0, '2022-01-23', '2022-01-23', 0, 150000, 0, '', '', '2022-02-04 17:12:13', NULL),
+(34, 8, 41, 0, '2022-01-23', '2022-01-23', 0, 150000, 0, '', '', '2022-02-07 10:10:29', NULL),
+(35, 7, 41, 0, '2022-01-23', '2022-01-23', 0, 150000, 0, '', '', '2022-02-07 10:10:40', NULL),
+(36, 7, 42, 0, '2022-02-23', '2022-02-23', 0, 150000, 0, '', '', '2022-02-07 10:11:32', NULL),
+(37, 4, 11, 0, '2022-01-23', '2022-01-25', 0, 150000, 0, '', '', '2022-02-07 10:11:59', NULL),
+(38, 6, 11, 0, '2022-01-23', '2022-01-25', 0, 150000, 0, '', '', '2022-02-07 10:12:03', NULL),
+(39, 6, 33, 0, '2022-01-23', '2022-01-25', 0, 150000, 0, '', '', '2022-02-07 10:12:12', NULL),
+(40, 5, 33, 0, '2022-01-23', '2022-01-25', 0, 150000, 0, '', '', '2022-02-07 10:12:19', NULL),
+(41, 9, 42, 0, '2022-01-23', '2022-01-25', 0, 150000, 0, '', '', '2022-02-07 10:13:46', NULL),
+(42, 9, 32, 0, '2022-01-23', '2022-01-25', 0, 150000, 0, '', '', '2022-02-07 10:14:26', NULL),
+(43, 9, 22, 0, '2022-01-23', '2022-01-25', 0, 150000, 0, '', '', '2022-02-07 10:14:28', NULL),
+(44, 7, 22, 0, '2022-01-23', '2022-01-25', 0, 150000, 0, '', '', '2022-02-07 10:14:31', NULL),
+(45, 7, 7, 0, '2022-01-23', '2022-01-25', 0, 150000, 0, '', '', '2022-02-07 10:14:59', NULL),
+(46, 7, 7, 0, '2022-01-23', '2022-01-25', 0, 0, 0, '', '', '2022-02-07 10:15:07', NULL),
+(59, 7, 7, 0, '2022-01-23', '2022-01-25', 0, NULL, 0, '', '', '2022-02-07 10:26:19', NULL),
+(60, 7, 7, 0, '2022-01-23', '2022-01-25', 0, 0, 0, '', '', '2022-02-07 10:26:24', NULL),
+(61, 7, 29, 0, '2022-01-23', '2022-01-25', 0, 40000, 0, '', '', '2022-02-07 10:32:38', NULL),
+(62, 8, 29, 0, '2022-01-23', '2022-01-25', 0, 40000, 0, '', '', '2022-02-07 10:32:42', NULL),
+(63, 8, 29, 0, '2022-01-24', '2022-01-25', 0, 40000, 0, '', '', '2022-02-07 15:12:27', NULL),
+(64, 8, 6, 0, '2022-01-24', '2022-01-25', 0, 120000, 0, '', '', '2022-02-07 15:13:18', NULL),
+(65, 1, 45, 0, '2022-01-23', '2022-01-23', 0, 40000, 0, '', '', '2022-02-12 19:46:51', NULL),
+(67, 1, 45, 0, '2022-01-23', '2022-01-23', 0, 40000, 0, '', '', '2022-02-14 11:14:40', NULL),
+(68, 19, 45, 0, '2022-02-23', '2022-02-23', 0, 40000, 0, '', '', '2022-02-24 10:05:13', NULL),
+(69, 20, 45, 0, '2022-02-23', '2022-02-23', 0, 40000, 0, '', '', '2022-02-24 10:05:21', NULL),
+(70, 20, 60, 0, '2022-02-23', '2022-02-23', 0, 40000, 0, '', '', '2022-02-24 10:05:48', NULL),
+(71, 21, 60, 0, '2022-02-23', '2022-02-23', 0, 40000, 0, '', '', '2022-02-24 10:05:55', NULL),
+(72, 22, 44, 0, '2022-02-23', '2022-02-23', 0, 40000, 0, '', '', '2022-02-24 10:06:11', NULL),
+(73, 23, 44, 0, '2022-02-23', '2022-02-23', 0, 40000, 0, '', '', '2022-02-24 10:06:18', NULL),
+(74, 26, 41, 0, '2022-02-23', '2022-02-23', 0, 50000, 0, '', '', '2022-02-24 10:06:28', NULL),
+(75, 26, 41, 2, '2022-02-23', '2022-02-23', 0, 50000, 0, '', '', '2022-03-05 17:33:49', NULL),
+(76, 26, 60, 2, '2022-02-23', '2022-02-23', 0, NULL, 0, '', '', '2022-03-05 15:52:06', '2022-03-06 19:30:30'),
+(77, 12, 60, 2, '0000-00-00', '0000-00-00', 0, 0, 0, '', '', '2022-03-06 16:19:55', NULL),
+(78, 12, 60, 2, '2022-02-07', '2022-02-08', 0, 0, 0, '', '', '2022-03-06 16:24:41', NULL),
+(79, 12, 53, 1, '2022-02-08', '2022-02-08', 0, 0, 0, '', '', '2022-03-06 19:10:03', NULL),
+(80, 32, 22, 3, '2022-02-07', '2022-02-07', 0, 120000, 0, '', '', '2022-03-07 10:55:46', NULL),
+(81, 32, 45, 1, '2022-02-07', '2022-02-08', 0, 80000, 0, '', '', '2022-03-07 11:02:04', NULL),
+(82, 12, 6, 1, '2022-02-08', '2022-02-08', 0, 24000.2, 0, '', '', '2022-03-07 14:28:00', NULL),
+(83, 33, 6, 2, '2022-02-09', '2022-02-10', 0, 96000.8, 0, '', '', '2022-03-08 10:45:34', NULL),
+(84, 26, 60, 2, '2022-04-04', '2022-04-04', 0, 120000, 2, '', '', '2022-04-04 00:23:44', '2022-04-20 18:45:37'),
+(85, 26, 12, 2, '2022-04-04', '2022-04-04', 0, 120000, 0, '', '', '2022-04-04 00:24:16', NULL),
+(86, 26, 23, 2, '2022-04-04', '2022-04-04', 0, 120000, 0, '', '', '2022-04-04 00:24:27', NULL),
+(87, 26, 33, 2, '2022-04-04', '2022-04-04', 0, 120000, 0, '', '', '2022-04-04 00:24:31', NULL),
+(88, 26, 34, 2, '2022-04-04', '2022-04-04', 0, 120000, 0, '', '', '2022-04-04 00:24:36', NULL),
+(89, 26, 31, 2, '2022-04-04', '2022-04-04', 0, 120000, 0, '', '', '2022-04-04 00:24:43', NULL),
+(90, 26, 35, 2, '2022-04-04', '2022-04-04', 0, 120000, 0, '', '', '2022-04-04 00:24:51', NULL),
+(91, 26, 42, 2, '2022-04-04', '2022-04-04', 0, 120000, 0, '', '', '2022-04-04 00:24:58', NULL),
+(98, 36, 60, 1, '2022-04-08', '2022-04-08', 0, 24000, 0, '', '', '2022-04-08 20:33:55', NULL),
+(100, 38, 60, 1, '2022-04-10', '2022-04-10', 0, NULL, 0, '', '', '2022-04-11 01:45:44', NULL),
+(101, 38, 6, 1, '2022-04-10', '2022-04-10', 0, 36000.3, 0, '', '', '2022-04-11 01:50:22', NULL),
+(102, 39, 13, 2, '2022-04-13', '2022-04-14', 0, 60000, 0, '', '', '2022-04-12 09:10:04', NULL),
+(104, 40, 31, 1, '2022-04-12', '2022-04-12', 0, 60000, 0, '', '', '2022-04-12 11:02:21', NULL),
+(105, 40, 31, 1, '2022-04-12', '2022-04-12', 0, 60000, 0, '', '', '2022-04-12 11:07:39', NULL),
+(106, 26, 60, 2, '2022-02-23', '2022-02-23', 0, NULL, 1, '56816058', 'NDL06545', '2022-04-19 16:27:32', NULL),
+(107, 26, 60, 2, '2022-02-23', '2022-02-23', 0, NULL, 1, '54888143', 'YEB55403', '2022-04-19 16:29:23', NULL);
 
 -- --------------------------------------------------------
 
@@ -154,7 +177,22 @@ INSERT INTO `otp` (`id`, `id_user`, `id_otp_type`, `code`, `is_expired`, `create
 (19, 29, 1, '474011', 0, '2022-03-06 22:10:52', NULL),
 (20, 30, 1, '150805', 0, '2022-03-06 22:14:04', NULL),
 (21, 31, 1, '314662', 0, '2022-03-06 22:28:28', NULL),
-(22, 32, 1, '045516', 0, '2022-03-06 22:31:15', NULL);
+(22, 32, 1, '045516', 0, '2022-03-06 22:31:15', NULL),
+(23, 12, 1, '287153', 0, '2022-03-07 14:22:34', NULL),
+(24, 13, 1, '337256', 0, '2022-03-07 14:30:27', NULL),
+(25, 32, 2, '155632', 0, '2022-03-07 20:01:01', NULL),
+(26, 32, 2, '375372', 1, '2022-03-07 20:18:10', '2022-03-07 20:28:20'),
+(27, 33, 2, '588254', 1, '2022-03-08 10:41:56', '2022-03-08 10:42:59'),
+(28, 33, 1, '635068', 0, '2022-03-08 10:43:49', NULL),
+(29, 33, 2, '755834', 0, '2022-03-08 10:48:10', NULL),
+(33, 38, 2, '865807', 0, '2022-04-09 18:18:09', NULL),
+(37, 38, 2, '330527', 1, '2022-04-10 01:20:09', '2022-04-10 01:26:36'),
+(38, 38, 2, '720256', 1, '2022-04-10 01:30:54', '2022-04-10 01:31:51'),
+(39, 38, 1, '782710', 0, '2022-04-10 02:06:42', NULL),
+(41, 38, 1, '504072', 1, '2022-04-10 02:42:27', '2022-04-10 02:42:50'),
+(42, 38, 2, '447251', 1, '2022-04-11 01:36:02', '2022-04-11 01:36:44'),
+(43, 39, 1, '584558', 1, '2022-04-12 09:07:39', '2022-04-12 09:08:23'),
+(44, 40, 1, '512183', 1, '2022-04-12 10:49:38', '2022-04-12 10:50:13');
 
 -- --------------------------------------------------------
 
@@ -202,6 +240,28 @@ INSERT INTO `roles` (`id`, `name`, `created_at`, `updated_at`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `transaction_status`
+--
+
+CREATE TABLE `transaction_status` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `transaction_status`
+--
+
+INSERT INTO `transaction_status` (`id`, `name`, `created_at`, `updated_at`) VALUES
+(1, 'Booked', '2022-04-14 18:14:53', NULL),
+(2, 'Paid', '2022-04-14 18:15:03', NULL),
+(3, 'Finish', '2022-04-14 18:15:10', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -215,7 +275,7 @@ CREATE TABLE `users` (
   `username` varchar(32) NOT NULL,
   `gender` varchar(6) DEFAULT NULL,
   `birth_date` date DEFAULT NULL,
-  `picture` varchar(100) DEFAULT NULL,
+  `picture` text DEFAULT NULL,
   `is_verified` tinyint(4) NOT NULL DEFAULT 0,
   `id_role` int(11) DEFAULT 3,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
@@ -236,9 +296,9 @@ INSERT INTO `users` (`id`, `email`, `password`, `name`, `phone_number`, `address
 (8, 'maryjane@mail.com', 'maryj', 'mary jane', '08778778999', 'jalan em je', 'mjane', 'female', '1980-01-01', NULL, 0, NULL, '2022-02-07 10:08:45', NULL),
 (9, 'guest@mail.com', 'g123', 'guest', '08123456789', 'guest st', 'guest', 'male', '1980-01-01', NULL, 0, NULL, '2022-02-07 10:09:32', NULL),
 (11, 'kelvin@mail.com', 'Kelvin123', 'Kelvin', '08798456123', 'admin st', 'kelw', 'male', '1980-01-01', NULL, 0, NULL, '2022-02-07 11:13:38', NULL),
-(12, 'admin1@mail.com', '$argon2i$v=19$m=4096,t=3,p=1$x2j7mljt2wmt5d3qfPA7Bg$K6XHoG7sGVBVyS7DMGgZxRfyAHPtKS3DJ51GW6EiOcA', 'admin', '08987456321', 'admin st', 'admin1', 'female', '1980-01-01', 'uploads\\user\\user-1644659234032-922611905.png', 0, 2, '2022-02-10 15:27:43', '2022-02-12 18:23:43'),
-(13, 'admin2@mail.com', '$argon2i$v=19$m=4096,t=3,p=1$43GmTE/RTOM16i3uUfikAA$GBMTeCEi1QYoqY6xDkbHHH4c8QRDxauSnCZj/ZWzNMk', 'admin', '08987456321', 'admin st', 'admin2', 'male', '1980-01-01', NULL, 0, 2, '2022-02-10 15:28:13', '2022-02-10 17:13:21'),
-(14, 'admin3@mail.com', '$argon2i$v=19$m=4096,t=3,p=1$4Ho3MIjuU+nb8QfKMkrgEw$y6AKvFqL2sW/Fora806hNPYhcJiF0i9jMexIY16DClQ', 'admin', '08987456321', 'admin st', 'admin3', 'male', '1980-01-01', NULL, 0, 2, '2022-02-10 15:30:50', '2022-02-10 17:13:22'),
+(12, 'admin1@mail.com', '$argon2i$v=19$m=4096,t=3,p=1$x2j7mljt2wmt5d3qfPA7Bg$K6XHoG7sGVBVyS7DMGgZxRfyAHPtKS3DJ51GW6EiOcA', 'admin', '08987456321', 'admin st', 'admin1', 'female', '1980-01-01', 'uploads\\user\\user-1644659234032-922611905.png', 1, 2, '2022-02-10 15:27:43', '2022-03-07 14:22:59'),
+(13, 'admin2@mail.com', '$argon2i$v=19$m=4096,t=3,p=1$43GmTE/RTOM16i3uUfikAA$GBMTeCEi1QYoqY6xDkbHHH4c8QRDxauSnCZj/ZWzNMk', 'admin', '08987456321', 'admin st', 'admin2', 'male', '1980-01-01', NULL, 1, 2, '2022-02-10 15:28:13', '2022-04-11 09:20:59'),
+(14, 'admin3@mail.com', '$argon2i$v=19$m=4096,t=3,p=1$4Ho3MIjuU+nb8QfKMkrgEw$y6AKvFqL2sW/Fora806hNPYhcJiF0i9jMexIY16DClQ', 'admin', '08987456321', 'admin st', 'admin3', 'male', '1980-01-01', 'uploads\\user\\user-1649643099019-463576478.jpg', 1, 2, '2022-02-10 15:30:50', '2022-04-11 10:11:39'),
 (15, 'user@mail.com', '$argon2i$v=19$m=4096,t=3,p=1$jFkEviRoMHP65rl2dkrswQ$ehId1vcpmEZXSVc4fQR4Ui63NqFxuer55hJtlbUyAUw', 'user', '08789654123', 'user st', 'user', 'male', '1980-01-01', NULL, 0, 3, '2022-02-10 17:26:31', NULL),
 (17, 'lucky7kelvin@yahoo.com', '$argon2i$v=19$m=4096,t=3,p=1$SNQgMrFydHU0TAG5h/vWZQ$hG6q+u/O8wGDJLug0TmCf+2QfJCBpMZGSoUhufeoq9g', '', NULL, NULL, 'kwong', NULL, NULL, NULL, 0, 3, '2022-02-11 13:07:28', '2022-02-14 11:03:03'),
 (18, 'dummy@user.com', '$argon2i$v=19$m=4096,t=3,p=1$FF/Xzctkk1xRDsyYDeg6yw$5j3HBMKX7FyULWKWz7FnEaB1vsNBT+odR7KT2uAx3h8', 'dummy user', NULL, NULL, 'dummy', NULL, NULL, NULL, 0, 3, '2022-02-11 17:21:17', NULL),
@@ -255,7 +315,38 @@ INSERT INTO `users` (`id`, `email`, `password`, `name`, `phone_number`, `address
 (29, 'decociy558@vapaka.com', '$argon2i$v=19$m=4096,t=3,p=1$tsY2yqmFAG2ixrdmp1QxKQ$4zzfrgLaplLh+4Uhq6OFykFqHt3CGXoHDTRg+3R8AHU', 'deco ciy', NULL, NULL, 'decoc', NULL, NULL, NULL, 1, 3, '2022-03-06 22:10:41', '2022-03-06 22:11:43'),
 (30, 'xahegej626@vapaka.com', '$argon2i$v=19$m=4096,t=3,p=1$1rK2rHwLYAp5qQ7rtVELxQ$tfS2MqnVcaiBbv+2r7AzBQ2fdVLQmxltZpZrvpUFZbI', 'xahe gej', NULL, NULL, 'xaheg', NULL, NULL, NULL, 1, 3, '2022-03-06 22:13:56', '2022-03-06 22:23:33'),
 (31, 'rices13296@toudrum.com', '$argon2i$v=19$m=4096,t=3,p=1$6z0vpb7LkFDwasUvplQQvw$f0V1Z3tpkAb1szL++OYiFNjKcRkjkIhofxb1HJr5ji4', 'rices toud', NULL, NULL, 'rices', NULL, NULL, NULL, 1, 3, '2022-03-06 22:28:16', '2022-03-06 22:30:11'),
-(32, 'fosiy18789@nitynote.com', '$argon2i$v=19$m=4096,t=3,p=1$jT/eU85bFqin1PjrSbRmnA$MkAvx+M9YXDEfxaBdebH0WuP9Qkb7bW2Ee1UmX4z4GM', 'fosiy nity', NULL, NULL, 'fosiy', NULL, NULL, NULL, 1, 3, '2022-03-06 22:31:06', '2022-03-06 22:31:44');
+(32, 'fosiy18789@nitynote.com', '$argon2i$v=19$m=4096,t=3,p=1$zHaqYdxaGfIhBIszujhfgQ$eYbpp5QgLXTQTGuLG427C0Ne7BaCBCVUZhHwPVzGrEE', 'fosiy nity', '0878787871', NULL, 'fosiy', NULL, NULL, NULL, 1, 3, '2022-03-06 22:31:06', '2022-04-03 19:16:54'),
+(33, 'ximisam710@ketchet.com', '$argon2i$v=19$m=4096,t=3,p=1$bhL+pE0/qm/gS4r0si2Ybg$GnsPKldBmYdNkpTeXF1UD0XelGDOICLprLmuu2Mo+kM', 'ximi sam', '08749849612', 'ximis street', 'ximis', NULL, NULL, NULL, 0, 3, '2022-03-08 10:41:21', '2022-03-08 19:16:39'),
+(34, 'sadob56115@nuesond.com', '$argon2i$v=19$m=4096,t=3,p=1$AAcYcJEfS4FmhYHhpZHZJg$2Cu3rVfNtoZFhpH2UYYR/AYjOQjr/Lm2r0+QQ2HLuLQ', 'Sadob Nuesond', NULL, NULL, 'sadob', NULL, NULL, NULL, 0, 3, '2022-04-03 14:58:57', NULL),
+(35, 'jilar77460@sartess.com', '$argon2i$v=19$m=4096,t=3,p=1$5yJmnsHr6HuiL8DQ53B2MA$2OS0i6lYL/a0QBnwwiYSAqozmsuc3D16VeYIPTu8lqE', 'Jilar Sartess', NULL, NULL, 'jilar', NULL, NULL, NULL, 0, 3, '2022-04-03 15:19:57', NULL),
+(36, 'asd@dsa.com', '$argon2i$v=19$m=4096,t=3,p=1$hoVzExkd61PA8BT05qIYMQ$jouL7QN9RhBf8Y4XhAL3hBEnN7m8epWcXZx+0iL0rJk', 'User 12 34', '08787871245', 'Jalan jalan', 'user1234', 'male', '2022-04-17', 'https://res.cloudinary.com/fazztrackfw5/image/upload/v1649903950/vehicle-renter/uploads/user/user-1649903949229.png', 1, 3, '2022-04-03 15:34:29', '2022-04-14 10:39:10'),
+(37, 'fepoca9824@royins.com', '$argon2i$v=19$m=4096,t=3,p=1$LFqlktBDO0zqeTr3z97eXA$vSgkGYZ9n8QbhjKwprKbKvATX1C4UMVc7tuez0MQzcE', 'fepoca dasas', NULL, NULL, 'fepoc', NULL, NULL, NULL, 0, 3, '2022-04-04 10:52:05', NULL),
+(38, 'venokel941@procowork.com', '$argon2i$v=19$m=4096,t=3,p=1$USltVasRhjMjczQjKF39qg$RZNtlm4wMXw2qFTuCGN31icSMHj+IJ21mL+qDVoER20', 'Venokel Proco Work', NULL, NULL, 'Venok', NULL, NULL, NULL, 1, 3, '2022-04-09 17:51:49', '2022-04-11 01:36:44'),
+(39, 'venir37024@bamibi.com', '$argon2i$v=19$m=4096,t=3,p=1$U0w4DGn4IfDRGhomqPjJIw$yvUcSvL/ekw9RVxnKiNSe2SL2t2S8SpAFEEGBhckvoM', 'venir bamibi', NULL, NULL, 'venir', NULL, NULL, NULL, 1, 3, '2022-04-12 09:07:10', '2022-04-12 09:08:23'),
+(40, 'mokatag814@bamibi.com', '$argon2i$v=19$m=4096,t=3,p=1$H0W1RJzvuZ8KDHfOorBC1Q$m9MBED3dlYB0fj/GLr7sf/ilal1Mujc7evs6QknqTw0', 'mokatag bamibi', '087789788', 'asdsad', 'mokat', NULL, '2022-04-13', 'uploads\\user\\user-1649732080539-837131266.jpg', 1, 3, '2022-04-12 10:48:58', '2022-04-12 10:54:40');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_favorite_vehicle`
+--
+
+CREATE TABLE `user_favorite_vehicle` (
+  `id` int(11) NOT NULL,
+  `id_user` int(11) NOT NULL,
+  `id_vehicle` int(11) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `user_favorite_vehicle`
+--
+
+INSERT INTO `user_favorite_vehicle` (`id`, `id_user`, `id_vehicle`, `created_at`, `updated_at`) VALUES
+(4, 13, 6, '2022-04-17 21:24:27', NULL),
+(5, 13, 55, '2022-04-17 21:24:39', NULL),
+(6, 13, 56, '2022-04-17 21:24:44', NULL);
 
 -- --------------------------------------------------------
 
@@ -294,14 +385,14 @@ INSERT INTO `vehicles` (`id`, `name`, `id_category`, `color`, `location`, `stock
 (10, 'Honda Brio', 3, 'Orange', 'Jakarta', 2, '259999.98', 0, NULL, 1, 0, '10:00', '2022-01-26 16:28:09', '2022-02-03 12:57:55'),
 (11, 'Honda BRV', 1, 'Silver', 'Jakarta', 2, '259999.98', 0, 'uploads\\vehicle\\vehicle-1645672007395-921460940.jpg', 1, 0, '10:00', '2022-01-26 16:33:06', '2022-02-24 11:07:25'),
 (12, 'Honda BRV', 1, 'Black', 'Jakarta', 2, '259999.98', 0, NULL, 1, 0, '10:00', '2022-01-26 16:36:38', '2022-02-03 12:58:01'),
-(13, 'E-Green Sport 500', 2, 'Grey', 'Jakarta', 2, '199999.98', 0, NULL, 1, 0, '10:00', '2022-01-26 16:37:08', '2022-02-03 12:58:03'),
+(13, 'E-Green Sport 500', 2, 'Grey', 'Jakarta', 2, '199999.98', 0, 'https://res.cloudinary.com/fazztrackfw5/image/upload/v1649904122/vehicle-renter/uploads/vehicle/vehicle-1649904121184.png', 1, 0, '10:00', '2022-01-26 16:37:08', '2022-04-14 10:42:02'),
 (21, 'E-Green Sport 500', 2, 'Dark Satin', 'Jakarta', 2, '199999.98', 0, NULL, 1, 0, '10:00', '2022-01-28 16:52:15', '2022-02-03 12:58:04'),
 (22, 'E-Green Sport 500', 2, 'Black', 'Bandung', 5, '199999.99', 1, 'uploads\\vehicle\\vehicle-1646099906728-186925485.jpg', 1, 1, NULL, '2022-01-28 16:52:55', '2022-03-01 09:58:26'),
 (23, 'E-Green Sport 500', 2, 'Grey', 'Bandung', 2, '199999.99', 0, NULL, 1, 0, '10:00', '2022-01-28 16:53:03', '2022-02-03 12:58:07'),
 (28, 'Toyota GR Supra', 1, 'Black', 'Jakarta', 1, '200000.00', 2, 'uploads\\vehicle\\vehicle-1645672139381-542709130.png', 0, 1, '10:00', '2022-01-31 15:11:24', '2022-02-24 11:08:59'),
 (29, 'Kuda', 1, 'Silver', 'Jakarta', 1, '200000.00', 1, 'uploads\\vehicle\\vehicle-1644808925237-141247827.jpg', 1, 1, '10:00', '2022-01-31 18:04:42', '2022-02-14 11:22:05'),
 (30, 'Corolla Cross', 1, 'Black', 'Jakarta', 1, '200000.00', 2, NULL, 0, 1, '10:00', '2022-01-31 18:05:36', '2022-02-07 10:03:28'),
-(31, 'Corolla Cross', 1, 'Red', 'Jakarta', 1, '200000.00', 2, NULL, 1, 1, '10:00', '2022-01-31 18:08:32', '2022-02-07 10:04:03'),
+(31, 'Corolla Cross', 1, 'Red', 'Jakarta', 8, '200000.00', 2, NULL, 1, 1, '10:00', '2022-01-31 18:08:32', '2022-04-11 19:19:49'),
 (32, 'Fortuner GR Sport', 1, 'Black', 'Jakarta', 2, '250000.00', 4, NULL, 1, 1, '10:00', '2022-01-31 21:33:22', '2022-02-07 10:05:52'),
 (33, 'Fortuner GR Sport', 1, 'Silver', 'Jakarta', 2, '250000.00', 4, NULL, 1, 1, '10:00', '2022-02-02 16:12:43', '2022-02-07 10:06:18'),
 (34, 'Fortuner GR Sport', 1, 'Red', 'Jakarta', 2, '250000.00', 4, NULL, 1, 1, '10:00', '2022-02-02 16:14:32', '2022-02-07 10:06:39'),
@@ -329,7 +420,12 @@ INSERT INTO `vehicles` (`id`, `name`, `id_category`, `color`, `location`, `stock
 (62, 'BMX Max', 2, 'Red', 'Jakarta', 3, '69999.99', 1, 'uploads\\vehicle\\vehicle-1644637653464-870587260.jpg', 0, 0, NULL, '2022-02-12 11:47:33', NULL),
 (63, 'BMX Max', 2, 'White', 'Jakarta', 3, '69999.99', 1, 'uploads\\vehicle\\vehicle-1644638736648-486826510.jpg', 0, 0, NULL, '2022-02-12 12:05:36', '2022-02-12 12:38:02'),
 (65, 'BMX Max 2', 2, 'White', 'Jakarta', 32, '69999.99', 1, NULL, 0, 0, NULL, '2022-02-14 10:59:39', NULL),
-(66, 'BMX Max3', 2, 'White', 'Jakarta', 32, '69999.99', 1, NULL, 0, 0, NULL, '2022-02-14 11:07:07', NULL);
+(66, 'BMX Max3', 2, 'White', 'Jakarta', 32, '69999.99', 1, NULL, 0, 0, NULL, '2022-02-14 11:07:07', NULL),
+(68, 'Coba 2', 2, 'White', 'Samarinda', 3, '25000.00', 2, 'uploads\\vehicle\\vehicle-1649587720338-910490957.jpg', 1, 0, NULL, '2022-04-10 18:48:40', '2022-04-11 19:31:26'),
+(71, 'coba lagi', 1, 'White', 'Samarinda', 1, '15000.00', 1, 'uploads\\vehicle\\vehicle-1649588559985-857135380.jpg', 0, 0, NULL, '2022-04-10 19:02:39', NULL),
+(72, 'coba lagi', 1, 'Red', 'Samarinda', 1, '15000.00', 1, 'uploads\\vehicle\\vehicle-1649588749119-332192622.jpg', 0, 0, NULL, '2022-04-10 19:05:49', NULL),
+(73, 'coba lagi 2', 1, 'White', 'Samarinda', 1, '15000.00', 1, 'uploads\\vehicle\\vehicle-1649588812885-941191452.jpg', 0, 0, NULL, '2022-04-10 19:06:52', NULL),
+(76, 'Test', 1, 'White', 'Jakarta', 1, '120000.00', 1, 'uploads\\vehicle\\vehicle-1649732294546-26088037.jpg', 0, 0, NULL, '2022-04-12 10:58:14', NULL);
 
 --
 -- Indexes for dumped tables
@@ -370,11 +466,23 @@ ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `transaction_status`
+--
+ALTER TABLE `transaction_status`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_role` (`id_role`);
+
+--
+-- Indexes for table `user_favorite_vehicle`
+--
+ALTER TABLE `user_favorite_vehicle`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `vehicles`
@@ -398,13 +506,13 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `histories`
 --
 ALTER TABLE `histories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=108;
 
 --
 -- AUTO_INCREMENT for table `otp`
 --
 ALTER TABLE `otp`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `otp_type`
@@ -419,16 +527,28 @@ ALTER TABLE `roles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `transaction_status`
+--
+ALTER TABLE `transaction_status`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+
+--
+-- AUTO_INCREMENT for table `user_favorite_vehicle`
+--
+ALTER TABLE `user_favorite_vehicle`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `vehicles`
 --
 ALTER TABLE `vehicles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
 
 --
 -- Constraints for dumped tables
