@@ -25,8 +25,8 @@ const getUserFavoriteVehicle = async (req, res) => {
       return responseHandler(res, 404, 'Cannot find the page you are looking for');
     }
     const pageInfo = {
-      prev: page > 1 ? `http://localhost:5000/favorite?${qs.stringify({ page: page - 1, limit })}` : null,
-      next: page < lastPage ? `http://localhost:5000/favorite?${qs.stringify({ page: page + 1, limit })}` : null,
+      prev: page > 1 ? `${APP_URL}/favorite?${qs.stringify({ page: page - 1, limit })}` : null,
+      next: page < lastPage ? `${APP_URL}/favorite?${qs.stringify({ page: page + 1, limit })}` : null,
       totalData: rowsCount,
       currentPage: page,
       lastPage,

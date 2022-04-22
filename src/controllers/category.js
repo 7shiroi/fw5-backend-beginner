@@ -20,8 +20,8 @@ const getCategories = async (req, res) => {
       const results = await categoryModel.getCategoriesAsync(data);
       if (results.length > 0) {
         const pageInfo = {
-          prev: page > 1 ? `http://localhost:5000/category?search=${search}&page=${page - 1}&limit=${limit}` : null,
-          next: page < lastPage ? `http://localhost:5000/category?search=${search}&page=${page + 1}&limit=${limit}` : null,
+          prev: page > 1 ? `${APP_URL}/category?search=${search}&page=${page - 1}&limit=${limit}` : null,
+          next: page < lastPage ? `${APP_URL}/category?search=${search}&page=${page + 1}&limit=${limit}` : null,
           totalData: rowsCount,
           currentPage: page,
           lastPage,
