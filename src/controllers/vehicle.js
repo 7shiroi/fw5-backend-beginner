@@ -132,14 +132,7 @@ const getVehicles = async (req, res) => {
           currentPage: page,
           lastPage,
         };
-        const mapResults = results.map((o) => {
-          if (o.image !== null) {
-            // eslint-disable-next-line no-param-reassign
-            o.image = `${APP_URL}/${o.image}`;
-          }
-          return o;
-        });
-        return responseHandler(res, 200, 'List Vehicles', mapResults, null, pageInfo);
+        return responseHandler(res, 200, 'List Vehicles', results, null, pageInfo);
       }
       return responseHandler(res, 400, 'List not found', results);
     }
@@ -157,14 +150,7 @@ const getVehicle = async (req, res) => {
     const { id } = req.params;
     const results = await vehicleModel.getVehicleAsync(id);
     if (results.length > 0) {
-      const mapResults = results.map((o) => {
-        if (o.image !== null) {
-          // eslint-disable-next-line no-param-reassign
-          o.image = `${APP_URL}/${o.image}`;
-        }
-        return o;
-      });
-      return responseHandler(res, 200, 'Detail Vehicle', mapResults[0]);
+      return responseHandler(res, 200, 'Detail Vehicle', results[0]);
     }
     return responseHandler(res, 404, 'Vehicle not found');
   } catch (error) {
@@ -236,14 +222,7 @@ const getPopularVehicles = async (req, res) => {
           currentPage: page,
           lastPage,
         };
-        const mapResults = results.map((o) => {
-          if (o.image !== null) {
-          // eslint-disable-next-line no-param-reassign
-            o.image = `${APP_URL}/${o.image}`;
-          }
-          return o;
-        });
-        return responseHandler(res, 200, 'List Popular Vehicles', mapResults, null, pageInfo);
+        return responseHandler(res, 200, 'List Popular Vehicles', results, null, pageInfo);
       }
       return responseHandler(res, 400, 'List not found', results);
     }
@@ -303,14 +282,7 @@ const getVehiclesFromCategory = async (req, res) => {
           currentPage: page,
           lastPage,
         };
-        const mapResults = results.map((o) => {
-          if (o.image !== null) {
-          // eslint-disable-next-line no-param-reassign
-            o.image = `${APP_URL}/${o.image}`;
-          }
-          return o;
-        });
-        return responseHandler(res, 200, 'List Vehicles grouped by category', mapResults, null, pageInfo);
+        return responseHandler(res, 200, 'List Vehicles grouped by category', results, null, pageInfo);
       }
       return responseHandler(res, 400, 'List not found', results);
     }
@@ -401,14 +373,7 @@ const addVehicle = async (req, res) => {
 
     const addVehicleData = await vehicleModel.addVehicleAsync(data);
     const insertedData = await vehicleModel.getVehicleAsync(addVehicleData.insertId);
-    const mapResults = insertedData.map((o) => {
-      if (o.image !== null) {
-        // eslint-disable-next-line no-param-reassign
-        o.image = `${APP_URL}/${o.image}`;
-      }
-      return o;
-    });
-    return responseHandler(res, 201, `${addVehicleData.affectedRows} vehicle added`, mapResults);
+    return responseHandler(res, 201, `${addVehicleData.affectedRows} vehicle added`, insertedData[0]);
   } catch (error) {
     if (req.file) {
       try {
@@ -515,14 +480,7 @@ const editVehicle = async (req, res) => {
       return responseHandler(res, 500, null, null, 'Unexpected error');
     }
     const updatedData = await vehicleModel.getVehicleAsync(id);
-    const mapResults = updatedData.map((o) => {
-      if (o.image !== null) {
-        // eslint-disable-next-line no-param-reassign
-        o.image = `${APP_URL}/${o.image}`;
-      }
-      return o;
-    });
-    return responseHandler(res, 200, `Vehicle with id ${id} has been updated`, mapResults[0]);
+    return responseHandler(res, 200, `Vehicle with id ${id} has been updated`, updatedData[0]);
   } catch (error) {
     if (req.file) {
       try {
