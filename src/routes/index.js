@@ -10,6 +10,7 @@ route.use('/auth', require('./auth'));
 route.use('/profile', require('./profile'));
 route.use('/transaction-status', require('./transactionStatus'));
 route.use('/favorite', require('./userFavoriteVehicle'));
+route.use('/payment', require('./payment'));
 
 route.get('/popular', getPopularVehicles);
 
