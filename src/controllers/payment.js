@@ -1,7 +1,9 @@
-const axios = require('axios');
+const midtransClient = require('midtrans-client');
 const responseHandler = require('../helpers/responseHandler');
 const userModel = require('../models/user');
 const historyModel = require('../models/history');
+
+const { MIDTRANS_SERVER_KEY } = process.env;
 
 exports.payment = async (req, res) => {
   try {
@@ -10,34 +12,28 @@ exports.payment = async (req, res) => {
       return responseHandler(res, 400, 'Transaction is not found');
     }
     const user = await userModel.getUserAsync(req.user.id);
-    const { data } = await axios({
-      url: 'https://app.sandbox.midtrans.com/snap/v1/transactions',
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization:
-          `Basic ${
-            Buffer.from('SB-Mid-server-GwUP_WGbJPXsDzsNEBRs8IYA').toString('base64')}`,
-        // Above is API server key for the Midtrans account, encoded to base64
-      },
-      data:
-      // Below is the HTTP request body in JSON
-      {
-        transaction_details: {
-          order_id: `order-csb-${Date.now()}`,
-          gross_amount: Math.round(transactionData[0].subtotal),
-        },
-        credit_card: {
-          secure: true,
-        },
-        customer_details: {
-          name: user[0].name,
-          email: user[0].email,
-          phone: user[0].phone_number,
-        },
-      },
+
+    const snap = new midtransClient.Snap({
+      isProduction: false,
+      serverKey: MIDTRANS_SERVER_KEY,
     });
+
+    const parameter = {
+      transaction_details: {
+        order_id: `order-${transactionData[0].booking_code}`,
+        gross_amount: Math.round(transactionData[0].subtotal),
+      },
+      credit_card: {
+        secure: true,
+      },
+      customer_details: {
+        first_name: user[0].name.split(' ')[0],
+        last_name: user[0].name.split(' ').slice(1).join(' '),
+        email: user[0].email,
+        phone: user[0].phone_number,
+      },
+    };
+    const data = await snap.createTransaction(parameter);
 
     return responseHandler(res, 200, 'Payment redirect data', data);
   } catch (error) {

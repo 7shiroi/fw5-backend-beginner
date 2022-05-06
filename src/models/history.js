@@ -62,7 +62,23 @@ exports.getHistoryAsync = (id, idUser = null) => new Promise((resolve, reject) =
   if (idUser) {
     extraQueryWhere = `AND id_user=${idUser}`;
   }
-  db.query(`SELECT h.id history_id, u.email, u.id 'id_user', id_vehicle, u.name 'user_name', v.name vehicle_name, v.price, quantity, (quantity * v.price * (DATEDIFF(h.date_end, h.date_start) + 1)) subtotal, h.date_start, h.date_end, h.has_returned, h.prepayment, ts.name transaction_status, h.booking_code, h.payment_code FROM histories h
+  db.query(`SELECT 
+    h.id history_id, 
+    u.email, 
+    u.id 'id_user', 
+    id_vehicle, 
+    u.name 'user_name', 
+    v.name vehicle_name, 
+    v.price, quantity, 
+    (quantity * v.price * (DATEDIFF(h.date_end, h.date_start) + 1)) subtotal, 
+    h.date_start,
+    h.date_end, 
+    h.has_returned, 
+    h.prepayment, 
+    ts.name transaction_status, 
+    h.booking_code, 
+    h.payment_code 
+  FROM histories h
   JOIN vehicles v ON h.id_vehicle = v.id 
   JOIN users u ON h.id_user = u.id
   LEFT JOIN transaction_status ts ON h.id_transaction_status = ts.id
