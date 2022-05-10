@@ -34,7 +34,6 @@ exports.payment = async (req, res) => {
       },
     };
     const data = await snap.createTransaction(parameter);
-
     return responseHandler(res, 200, 'Payment redirect data', data);
   } catch (error) {
     return responseHandler(res, 500, 'Unexpected Error', error);
