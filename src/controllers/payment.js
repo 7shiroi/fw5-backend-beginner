@@ -40,3 +40,20 @@ exports.payment = async (req, res) => {
     return responseHandler(res, 500, 'Unexpected Error', error);
   }
 };
+
+exports.successPayment = async (req, res) => {
+  try {
+    const transactionData = await historyModel.getHistoryAsync(req.body.idHistory);
+    if (transactionData.length === 0) {
+      return responseHandler(res, 400, 'Transaction is not found');
+    }
+    const updateStatus = await historyModel
+      .editHistoryAsync(transactionData[0].history_id, { id_transaction_status: 2 });
+    if (updateStatus.affectedRows === 0) {
+      return responseHandler(res, 500, 'Update failed!');
+    }
+    return responseHandler(res, 200, 'Transaction status updated!');
+  } catch (error) {
+    return responseHandler(res, 500, 'Unexpected Error', error);
+  }
+};
