@@ -11,6 +11,4 @@ const conn = mysql.createPool({
   database: DB_NAME,
 });
 
-// conn.connect();
-
 module.exports = conn;
