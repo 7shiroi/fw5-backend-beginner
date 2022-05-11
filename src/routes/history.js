@@ -1,5 +1,4 @@
 const history = require('express').Router();
-const cors = require('cors');
 const { verifyUser, checkVerified } = require('../helpers/auth');
 
 const {
@@ -10,14 +9,10 @@ const {
   deleteHistory,
 } = require('../controllers/history');
 
-const corsOptions = {
-  origin: 'http://localhost:3000',
-};
-
-history.get('/', cors(corsOptions), verifyUser, getHistories);
-history.get('/:id', cors(corsOptions), verifyUser, getHistory);
-history.post('/', cors(corsOptions), verifyUser, checkVerified, addHistory);
-history.patch('/:id', cors(corsOptions), verifyUser, editHistory);
-history.delete('/:id', cors(corsOptions), verifyUser, deleteHistory);
+history.get('/', verifyUser, getHistories);
+history.get('/:id', verifyUser, getHistory);
+history.post('/', verifyUser, checkVerified, addHistory);
+history.patch('/:id', verifyUser, editHistory);
+history.delete('/:id', verifyUser, deleteHistory);
 
 module.exports = history;
